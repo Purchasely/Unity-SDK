@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
 }
 
+apply plugin: 'com.huawei.agconnect'
+
 android {
     namespace 'com.purchasely.unity'
     compileSdk 32
@@ -30,4 +32,5 @@ dependencies {
     implementation 'io.purchasely:core:3.4.1'
     implementation 'io.purchasely:google-play:3.4.1'
     implementation 'io.purchasely:amazon:3.4.1'
+    implementation 'io.purchasely:huawei-services:3.4.1'
 }
