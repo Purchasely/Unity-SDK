@@ -3,7 +3,9 @@ package com.purchasely.unity;
 import android.app.Activity;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
+import com.purchasely.unity.proxy.EventProxy;
 import com.purchasely.unity.proxy.StartProxy;
 
 import java.util.ArrayList;
@@ -11,7 +13,9 @@ import java.util.List;
 
 import io.purchasely.amazon.AmazonStore;
 import io.purchasely.billing.Store;
+import io.purchasely.ext.EventListener;
 import io.purchasely.ext.LogLevel;
+import io.purchasely.ext.PLYEvent;
 import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.google.GoogleStore;
@@ -23,11 +27,13 @@ import kotlin.jvm.functions.Function2;
 @Keep
 public class PurchaselyBridge {
 	private StartProxy _startProxy;
+	private final EventProxy _eventProxy;
 
 	@Keep
 	public PurchaselyBridge(Activity activity, String apiKey, String userId, boolean readyToPurchase,
-	                        int storeFlags, int logLevel, int runningMode, final StartProxy proxy) {
+	                        int storeFlags, int logLevel, int runningMode, EventProxy eventProxy, StartProxy proxy) {
 		_startProxy = proxy;
+		_eventProxy = eventProxy;
 
 		new Purchasely.Builder(activity.getApplicationContext())
 				.apiKey(apiKey)
@@ -36,6 +42,12 @@ public class PurchaselyBridge {
 				.logLevel(parseLogLevel(logLevel))
 				.runningMode(parseMode(runningMode))
 				.stores(parseStoreFlags(storeFlags))
+				.eventListener(new EventListener() {
+					@Override
+					public void onEvent(@NonNull PLYEvent plyEvent) {
+						_eventProxy.onEventReceived(plyEvent);
+					}
+				})
 				.build();
 
 		Purchasely.start(new Function2<Boolean, PLYError, Unit>() {
