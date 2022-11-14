@@ -14,3 +14,7 @@ plugins {
     id 'com.android.application' version '7.3.0' apply false
     id 'com.android.library' version '7.3.0' apply false
 }
+
+project.ext {
+    libraryFolder = file("../purchasely-package/Native/Android").absolutePath
+}
