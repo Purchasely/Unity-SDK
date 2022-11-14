@@ -1,0 +1,3 @@
+[submodule "purchasely-package"]
+	path = purchasely-package
+	url = https://github.com/NinevaStudios/purchasely-package
