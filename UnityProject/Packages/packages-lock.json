@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.purchasely.unity": {
+      "version": "file:D:/Projects/purchasely-unity/purchasely-package",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "3.2.10",
       "depth": 0,
