@@ -45,7 +45,7 @@ public class PurchaselyBridge {
 				.eventListener(new EventListener() {
 					@Override
 					public void onEvent(@NonNull PLYEvent plyEvent) {
-						_eventProxy.onEventReceived(plyEvent);
+						_eventProxy.onEventReceived(plyEvent.getId(), plyEvent.getName(), plyEvent.getProperties().toJson());
 					}
 				})
 				.build();
