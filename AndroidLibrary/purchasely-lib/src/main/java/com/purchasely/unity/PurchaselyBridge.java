@@ -6,7 +6,9 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import com.purchasely.unity.proxy.EventProxy;
+import com.purchasely.unity.proxy.PlacementContentProxy;
 import com.purchasely.unity.proxy.StartProxy;
+import com.purchasely.unity.proxy.UserLoginProxy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,28 +18,34 @@ import io.purchasely.billing.Store;
 import io.purchasely.ext.EventListener;
 import io.purchasely.ext.LogLevel;
 import io.purchasely.ext.PLYEvent;
+import io.purchasely.ext.PLYPresentationViewProperties;
+import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.huawei.HuaweiStore;
 import io.purchasely.models.PLYError;
+import io.purchasely.models.PLYPlan;
 import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 
 @Keep
 public class PurchaselyBridge {
 	private StartProxy _startProxy;
 	private final EventProxy _eventProxy;
+	private UserLoginProxy _userLoginProxy;
+	private PlacementContentProxy _placementContentProxy;
 
 	@Keep
 	public PurchaselyBridge(Activity activity, String apiKey, String userId, boolean readyToPurchase,
-	                        int storeFlags, int logLevel, int runningMode, EventProxy eventProxy, StartProxy proxy) {
+	                        int storeFlags, int logLevel, int runningMode, StartProxy proxy, EventProxy eventProxy) {
 		_startProxy = proxy;
 		_eventProxy = eventProxy;
 
-		new Purchasely.Builder(activity.getApplicationContext())
+		Purchasely.Builder builder = new Purchasely.Builder(activity.getApplicationContext())
 				.apiKey(apiKey)
-				.userId(userId)
 				.isReadyToPurchase(readyToPurchase)
 				.logLevel(parseLogLevel(logLevel))
 				.runningMode(parseMode(runningMode))
@@ -47,8 +55,12 @@ public class PurchaselyBridge {
 					public void onEvent(@NonNull PLYEvent plyEvent) {
 						_eventProxy.onEventReceived(plyEvent.getId(), plyEvent.getName(), plyEvent.getProperties().toJson());
 					}
-				})
-				.build();
+				});
+
+		if (!userId.isEmpty())
+			builder = builder.userId(userId);
+
+		builder.build();
 
 		Purchasely.start(new Function2<Boolean, PLYError, Unit>() {
 			@Override
@@ -58,6 +70,62 @@ public class PurchaselyBridge {
 
 				_startProxy.onStartCompleted(success, error == null ? "" : error.toString());
 				_startProxy = null;
+				return null;
+			}
+		});
+	}
+
+	@Keep
+	public void userLogin(String userId, UserLoginProxy userLoginProxy) {
+		_userLoginProxy = userLoginProxy;
+
+		Purchasely.userLogin(userId, new Function1<Boolean, Unit>() {
+			@Override
+			public Unit invoke(Boolean refreshRequired) {
+				_userLoginProxy.onUserLogin(refreshRequired);
+				_userLoginProxy = null;
+
+				return null;
+			}
+		});
+	}
+
+	@Keep
+	public void setIsReadyToPurchase(boolean ready) {
+		Purchasely.setReadyToPurchase(ready);
+	}
+
+	@Keep
+	public void showContentForPlacement(Activity activity, String placementId, Boolean displayCloseButton, PlacementContentProxy proxy, String presentationId, String productId, String planId, String contentId) {
+		_placementContentProxy = proxy;
+
+		if (presentationId.isEmpty())
+			presentationId = null;
+		if (productId.isEmpty())
+			productId = null;
+		if (planId.isEmpty())
+			planId = null;
+		if (contentId.isEmpty())
+			contentId = null;
+
+		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(placementId, presentationId, productId, planId, contentId, displayCloseButton, new Function1<Boolean, Unit>() {
+			@Override
+			public Unit invoke(Boolean isLoaded) {
+				_placementContentProxy.onContentLoaded(isLoaded);
+				return null;
+			}
+		}, new Function0<Unit>() {
+			@Override
+			public Unit invoke() {
+				_placementContentProxy.onContentClosed();
+				return null;
+			}
+		});
+
+		Purchasely.presentationView(activity, properties, new Function2<PLYProductViewResult, PLYPlan, Unit>() {
+			@Override
+			public Unit invoke(PLYProductViewResult plyProductViewResult, PLYPlan plyPlan) {
+				_placementContentProxy.onPresentationResult(parseProductViewResult(plyProductViewResult), plyPlan);
 				return null;
 			}
 		});
@@ -97,6 +165,15 @@ public class PurchaselyBridge {
 			return PLYRunningMode.TransactionOnly.INSTANCE;
 
 		return PLYRunningMode.Full.INSTANCE;
+	}
+
+	private int parseProductViewResult(PLYProductViewResult productViewResult) {
+		if (productViewResult == PLYProductViewResult.PURCHASED)
+			return 0;
+		if (productViewResult == PLYProductViewResult.RESTORED)
+			return 1;
+
+		return 2;
 	}
 
 	protected void finalize() {
