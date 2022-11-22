@@ -13,7 +13,6 @@ import com.purchasely.unity.proxy.UserLoginProxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.purchasely.amazon.AmazonStore;
 import io.purchasely.billing.Store;
 import io.purchasely.ext.EventListener;
 import io.purchasely.ext.LogLevel;
@@ -23,7 +22,6 @@ import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.google.GoogleStore;
-import io.purchasely.huawei.HuaweiStore;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
 import kotlin.Unit;
@@ -135,10 +133,10 @@ public class PurchaselyBridge {
 		ArrayList<io.purchasely.billing.Store> stores = new ArrayList<>();
 		if ((storeFlags & 0x00000002) != 0)
 			stores.add(new GoogleStore());
-		if ((storeFlags & 0x00000004) != 0)
-			stores.add(new AmazonStore());
-		if ((storeFlags & 0x00000008) != 0)
-			stores.add(new HuaweiStore());
+//		if ((storeFlags & 0x00000004) != 0)
+//			stores.add(new AmazonStore());
+//		if ((storeFlags & 0x00000008) != 0)
+//			stores.add(new HuaweiStore());
 
 		return stores;
 	}
