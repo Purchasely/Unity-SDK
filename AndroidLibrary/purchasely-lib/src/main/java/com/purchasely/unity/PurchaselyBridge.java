@@ -94,19 +94,13 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void showContentForPlacement(Activity activity, String placementId, Boolean displayCloseButton, PlacementContentProxy proxy, String presentationId, String productId, String planId, String contentId) {
+	public void showContentForPlacement(Activity activity, String placementId, Boolean displayCloseButton, PlacementContentProxy proxy, String contentId) {
 		_placementContentProxy = proxy;
 
-		if (presentationId.isEmpty())
-			presentationId = null;
-		if (productId.isEmpty())
-			productId = null;
-		if (planId.isEmpty())
-			planId = null;
 		if (contentId.isEmpty())
 			contentId = null;
 
-		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(placementId, presentationId, productId, planId, contentId, displayCloseButton, new Function1<Boolean, Unit>() {
+		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(placementId, null, null, null, contentId, displayCloseButton, new Function1<Boolean, Unit>() {
 			@Override
 			public Unit invoke(Boolean isLoaded) {
 				_placementContentProxy.onContentLoaded(isLoaded);
