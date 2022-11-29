@@ -26,9 +26,9 @@ android {
 }
 
 dependencies {
-    implementation 'io.purchasely:core:3.4.1'
-    implementation 'io.purchasely:player:3.4.1'
-    implementation 'io.purchasely:google-play:3.4.1'
+    implementation 'io.purchasely:core:1.1.0-alpha02'
+    implementation 'io.purchasely:player:1.1.0-alpha02'
+    implementation 'io.purchasely:google-play:1.1.0-alpha02'
 }
 
 task copyAarToUnity {
