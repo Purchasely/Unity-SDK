@@ -94,7 +94,7 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void showContentForPlacement(Activity activity, String placementId, Boolean displayCloseButton, PlacementContentProxy proxy, String contentId) {
+	public void showContentForPlacement(Activity activity, String placementId, boolean displayCloseButton, PlacementContentProxy proxy, String contentId) {
 		_placementContentProxy = proxy;
 
 		if (contentId.isEmpty())
