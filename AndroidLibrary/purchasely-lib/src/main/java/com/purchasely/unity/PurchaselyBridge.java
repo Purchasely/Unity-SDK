@@ -92,14 +92,63 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void showContentForPlacement(Activity activity, String placementId, boolean displayCloseButton, PlacementContentProxy proxy, String contentId) {
+	public void showContentForPlacement(Activity activity, String placementId,
+	                                    PlacementContentProxy proxy, String contentId) {
 		placementContentProxy = proxy;
 
 		Intent intent = new Intent(activity, PurchaselyActivity.class);
 
+		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PLACEMENT);
+
 		intent.putExtra(PurchaselyActivity.EXTRA_PLACEMENT_ID, placementId);
 		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
-		intent.putExtra(PurchaselyActivity.EXTRA_SHOW_CLOSE_BUTTON, displayCloseButton);
+
+		activity.startActivity(intent);
+	}
+
+	@Keep
+	public void showContentForPresentation(Activity activity, String presentationId,
+	                                       PlacementContentProxy proxy, String contentId) {
+		placementContentProxy = proxy;
+
+		Intent intent = new Intent(activity, PurchaselyActivity.class);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PRESENTATION);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+
+		activity.startActivity(intent);
+	}
+
+	@Keep
+	public void showContentForProduct(Activity activity, String productId,
+	                                       PlacementContentProxy proxy, String contentId, String presentationId) {
+		placementContentProxy = proxy;
+
+		Intent intent = new Intent(activity, PurchaselyActivity.class);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PRODUCT);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_PRODUCT_ID, productId);
+		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+
+		activity.startActivity(intent);
+	}
+
+	@Keep
+	public void showContentForPlan(Activity activity, String planId,
+	                                  PlacementContentProxy proxy, String contentId, String presentationId) {
+		placementContentProxy = proxy;
+
+		Intent intent = new Intent(activity, PurchaselyActivity.class);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PLAN);
+
+		intent.putExtra(PurchaselyActivity.EXTRA_PLAN_ID, planId);
+		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
