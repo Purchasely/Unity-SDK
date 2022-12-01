@@ -44,6 +44,9 @@ public class PurchaselyActivity extends AppCompatActivity {
 			@Override
 			public Unit invoke() {
 				PurchaselyBridge.placementContentProxy.onContentClosed();
+
+				((ViewGroup) findViewById(R.id.content)).removeAllViews();
+				supportFinishAfterTransition();
 				return null;
 			}
 		});
