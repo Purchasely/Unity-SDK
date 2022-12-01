@@ -1,6 +1,7 @@
 package com.purchasely.unity;
 
 import android.app.Activity;
+import android.content.Intent;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -16,11 +17,14 @@ import java.util.List;
 import io.purchasely.billing.Store;
 import io.purchasely.ext.EventListener;
 import io.purchasely.ext.LogLevel;
+import io.purchasely.ext.PLYAlertMessage;
 import io.purchasely.ext.PLYEvent;
 import io.purchasely.ext.PLYPresentationViewProperties;
 import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
+import io.purchasely.ext.PLYUIFragmentType;
 import io.purchasely.ext.Purchasely;
+import io.purchasely.ext.UIListener;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
@@ -34,7 +38,7 @@ public class PurchaselyBridge {
 	private StartProxy _startProxy;
 	private final EventProxy _eventProxy;
 	private UserLoginProxy _userLoginProxy;
-	private PlacementContentProxy _placementContentProxy;
+	static PlacementContentProxy placementContentProxy;
 
 	@Keep
 	public PurchaselyBridge(Activity activity, String apiKey, String userId, boolean readyToPurchase,
@@ -48,6 +52,17 @@ public class PurchaselyBridge {
 				.logLevel(parseLogLevel(logLevel))
 				.runningMode(parseMode(runningMode))
 				.stores(parseStoreFlags(storeFlags))
+				.uiListener(new UIListener() {
+					@Override
+					public void onAlert(@NonNull PLYAlertMessage plyAlertMessage) {
+
+					}
+
+					@Override
+					public void onFragment(@NonNull androidx.fragment.app.Fragment fragment, @NonNull PLYUIFragmentType plyuiFragmentType) {
+
+					}
+				})
 				.eventListener(new EventListener() {
 					@Override
 					public void onEvent(@NonNull PLYEvent plyEvent) {
@@ -95,32 +110,15 @@ public class PurchaselyBridge {
 
 	@Keep
 	public void showContentForPlacement(Activity activity, String placementId, boolean displayCloseButton, PlacementContentProxy proxy, String contentId) {
-		_placementContentProxy = proxy;
+		placementContentProxy = proxy;
 
-		if (contentId.isEmpty())
-			contentId = null;
+		Intent intent = new Intent(activity, PurchaselyActivity.class);
 
-		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(placementId, null, null, null, contentId, displayCloseButton, new Function1<Boolean, Unit>() {
-			@Override
-			public Unit invoke(Boolean isLoaded) {
-				_placementContentProxy.onContentLoaded(isLoaded);
-				return null;
-			}
-		}, new Function0<Unit>() {
-			@Override
-			public Unit invoke() {
-				_placementContentProxy.onContentClosed();
-				return null;
-			}
-		});
+		intent.putExtra(PurchaselyActivity.EXTRA_PLACEMENT_ID, placementId);
+		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+		intent.putExtra(PurchaselyActivity.EXTRA_SHOW_CLOSE_BUTTON, displayCloseButton);
 
-		Purchasely.presentationView(activity, properties, new Function2<PLYProductViewResult, PLYPlan, Unit>() {
-			@Override
-			public Unit invoke(PLYProductViewResult plyProductViewResult, PLYPlan plyPlan) {
-				_placementContentProxy.onPresentationResult(parseProductViewResult(plyProductViewResult), plyPlan);
-				return null;
-			}
-		});
+		activity.startActivity(intent);
 	}
 
 	private List<Store> parseStoreFlags(int storeFlags) {
@@ -159,16 +157,8 @@ public class PurchaselyBridge {
 		return PLYRunningMode.Full.INSTANCE;
 	}
 
-	private int parseProductViewResult(PLYProductViewResult productViewResult) {
-		if (productViewResult == PLYProductViewResult.PURCHASED)
-			return 0;
-		if (productViewResult == PLYProductViewResult.RESTORED)
-			return 1;
-
-		return 2;
-	}
-
 	protected void finalize() {
+		placementContentProxy = null;
 		Purchasely.close();
 	}
 }
