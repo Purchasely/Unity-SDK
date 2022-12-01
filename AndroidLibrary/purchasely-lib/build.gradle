@@ -26,11 +26,13 @@ android {
 }
 
 dependencies {
-    implementation "androidx.fragment:fragment:1.5.4"
-    implementation "androidx.appcompat:appcompat:1.5.1"
     implementation 'io.purchasely:core:1.1.0-alpha02'
     implementation 'io.purchasely:player:1.1.0-alpha02'
     implementation 'io.purchasely:google-play:1.1.0-alpha02'
+
+    implementation "androidx.fragment:fragment:1.5.4"
+    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
 
 task copyAarToUnity {

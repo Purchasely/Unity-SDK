@@ -124,44 +124,28 @@ public class PurchaselyActivity extends AppCompatActivity {
 	}
 
 	private Function1<Boolean, Unit> contentLoadedCallback() {
-		return new Function1<Boolean, Unit>() {
-			@Override
-			public Unit invoke(Boolean isLoaded) {
-				PurchaselyBridge.placementContentProxy.onContentLoaded(isLoaded);
-				return null;
-			}
+		return isLoaded -> {
+			PurchaselyBridge.placementContentProxy.onContentLoaded(isLoaded);
+			return null;
 		};
 	}
 
 	private Function0<Unit> viewClosedCallback() {
-		return new Function0<Unit>() {
-			@Override
-			public Unit invoke() {
-				PurchaselyBridge.placementContentProxy.onContentClosed();
+		return () -> {
+			PurchaselyBridge.placementContentProxy.onContentClosed();
+			PurchaselyBridge.placementContentProxy = null;
 
-				((ViewGroup) findViewById(R.id.content)).removeAllViews();
-				supportFinishAfterTransition();
-				return null;
-			}
+			((ViewGroup) findViewById(R.id.content)).removeAllViews();
+			supportFinishAfterTransition();
+			return null;
 		};
 	}
 
 	private Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
-		return new Function2<PLYProductViewResult, PLYPlan, Unit>() {
-			@Override
-			public Unit invoke(PLYProductViewResult plyProductViewResult, PLYPlan plyPlan) {
-				PurchaselyBridge.placementContentProxy.onPresentationResult(parseProductViewResult(plyProductViewResult), plyPlan);
-				return null;
-			}
+		return (plyProductViewResult, plyPlan) -> {
+			PurchaselyBridge.placementContentProxy.onPresentationResult(
+					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
+			return null;
 		};
-	}
-
-	private int parseProductViewResult(PLYProductViewResult productViewResult) {
-		if (productViewResult == PLYProductViewResult.PURCHASED)
-			return 0;
-		if (productViewResult == PLYProductViewResult.RESTORED)
-			return 1;
-
-		return 2;
 	}
 }
