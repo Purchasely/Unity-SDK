@@ -8,18 +8,25 @@ import android.util.Log;
 import androidx.annotation.Keep;
 
 import com.purchasely.unity.proxy.EventProxy;
+import com.purchasely.unity.proxy.PaywallInterceptorProxy;
 import com.purchasely.unity.proxy.PlacementContentProxy;
 import com.purchasely.unity.proxy.JsonErrorProxy;
 import com.purchasely.unity.proxy.PresentationResultProxy;
 import com.purchasely.unity.proxy.StartProxy;
 import com.purchasely.unity.proxy.UserLoginProxy;
 
+import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import io.purchasely.ext.PLYPresentationAction;
+import io.purchasely.ext.PLYProcessActionListener;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
@@ -39,6 +46,14 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
+	private PaywallInterceptorProxy _paywallInterceptorProxy;
+
+	private PLYProcessActionListener processActionListener;
+	private PLYPresentationAction paywallAction;
+
+	WeakReference<Activity> unityActivity;
+
+	static PresentationActivityCache presentationActivityCache = null;
 
 	@Keep
 	public PurchaselyBridge(Activity activity, String apiKey, String userId, boolean readyToPurchase,
@@ -46,6 +61,8 @@ public class PurchaselyBridge {
 	                        EventProxy eventProxy) {
 		_startProxy = proxy;
 		_eventProxy = eventProxy;
+
+		unityActivity = new WeakReference<>(activity);
 
 		Purchasely.Builder builder = new Purchasely.Builder(activity.getApplicationContext())
 				.apiKey(apiKey)
@@ -97,8 +114,10 @@ public class PurchaselyBridge {
 
 		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLACEMENT);
 
-		intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
-		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+		if (!placementId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
+		if (!contentId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -112,8 +131,10 @@ public class PurchaselyBridge {
 
 		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION);
 
-		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+		if (!presentationId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		if (!contentId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -127,9 +148,12 @@ public class PurchaselyBridge {
 
 		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRODUCT);
 
-		intent.putExtra(PresentationActivity.EXTRA_PRODUCT_ID, productId);
-		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+		if (!productId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PRODUCT_ID, productId);
+		if (!presentationId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		if (!contentId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -143,9 +167,12 @@ public class PurchaselyBridge {
 
 		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLAN);
 
-		intent.putExtra(PresentationActivity.EXTRA_PLAN_ID, planId);
-		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+		if (!planId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PLAN_ID, planId);
+		if (!presentationId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		if (!contentId.isEmpty())
+			intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -347,8 +374,65 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void setPaywallActionInterceptor() {
-		// TODO:
+	public void setPaywallActionInterceptor(PaywallInterceptorProxy proxy) {
+		_paywallInterceptorProxy = proxy;
+
+		Purchasely.setPaywallActionsInterceptor((info, plyPresentationAction, map, plyProcessActionListener) -> {
+			processActionListener = plyProcessActionListener;
+			paywallAction = plyPresentationAction;
+
+			Uri url = map.getUrl();
+			String urlString = "";
+			if (url != null) {
+				urlString = url.toString();
+			}
+
+			HashMap<String, Object> parameters = new HashMap<>();
+			parameters.put("title", map.getTitle());
+			parameters.put("url", urlString);
+
+			PLYPlan plan = map.getPlan();
+			if (plan != null)
+				parameters.put("plan", plan.toMap());
+
+			parameters.put("presentation", map.getPresentation());
+
+			HashMap<String, Object> infoMap = new HashMap<>();
+
+			if (info != null) {
+				if (info.getContentId() != null)
+					infoMap.put("contentId", info.getContentId());
+				if (info.getPresentationId() != null)
+					infoMap.put("presentationId", info.getPresentationId());
+				if (info.getPlacementId() != null)
+					infoMap.put("placementId", info.getPlacementId());
+				if (info.getAbTestId() != null) infoMap.put("abTestId", info.getAbTestId());
+				if (info.getAbTestVariantId() != null)
+					infoMap.put("abTestVariantId", info.getAbTestVariantId());
+			}
+
+			HashMap<String, Object> result = new HashMap<>();
+			result.put("info", infoMap);
+			result.put("action", plyPresentationAction.getValue());
+			result.put("parameters", parameters);
+
+			_paywallInterceptorProxy.onAction(new JSONObject(result).toString());
+			closePaywall();
+		});
+	}
+
+	private void closePaywall() {
+		Activity purchaselyActivity = null;
+		if (presentationActivityCache != null && presentationActivityCache.activity != null) {
+			purchaselyActivity = presentationActivityCache.activity.get();
+		}
+
+		Activity unityActivitySaved = unityActivity.get();
+
+		Activity currentActivity = purchaselyActivity != null ? purchaselyActivity : unityActivitySaved;
+		Intent intent = new Intent(currentActivity, unityActivity.getClass());
+		intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+		unityActivitySaved.startActivity(intent);
 	}
 
 	private Function1<PLYPlan, Unit> purchaseRestoredCallback() {
@@ -357,6 +441,45 @@ public class PurchaselyBridge {
 			_restoreProductsProxy = null;
 			return null;
 		};
+	}
+
+	@Keep
+	public void processPaywallAction(Activity activity, boolean processAction) {
+		if (processActionListener == null) return;
+
+		PLYPresentationAction action = PLYPresentationAction.CLOSE;
+		if (paywallAction != null) action = paywallAction;
+
+		switch (action) {
+			case PROMO_CODE:
+			case RESTORE:
+			case PURCHASE:
+			case LOGIN:
+			case OPEN_PRESENTATION:
+				processActionWithPaywallActivity(activity, processAction);
+				break;
+			default:
+				activity.runOnUiThread(() -> processActionListener.processAction(processAction));
+		}
+	}
+
+	private void processActionWithPaywallActivity(Activity activity, boolean processAction) {
+		if (processActionListener == null) return;
+
+		boolean softRelaunched = presentationActivityCache != null && presentationActivityCache.relaunch(activity);
+		if (softRelaunched) {
+			activity.runOnUiThread(() -> processActionListener.processAction(processAction));
+		} else {
+			new Thread(() -> {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					Log.e("PurchaselyBridge", "Process action error.", e);
+				} finally {
+					activity.runOnUiThread(() -> processActionListener.processAction(processAction));
+				}
+			}).start();
+		}
 	}
 
 	private Function1<PLYError, Unit> purchaseRestoreErrorCallback() {
@@ -377,5 +500,48 @@ public class PurchaselyBridge {
 	protected void finalize() {
 		placementContentProxy = null;
 		Purchasely.close();
+	}
+
+	static class PresentationActivityCache {
+		String presentationId = null;
+		String placementId = null;
+		String productId = null;
+		String planId = null;
+		String contentId = null;
+		int actionCode = -1;
+
+		WeakReference<PresentationActivity> activity = null;
+
+		boolean relaunch(Activity unityActivity) {
+			PresentationActivity backgroundActivity = null;
+
+			if (activity != null) {
+				backgroundActivity = activity.get();
+			}
+
+			Intent intent;
+
+			boolean relaunchExisting = backgroundActivity != null
+					&& !backgroundActivity.isFinishing()
+					&& !backgroundActivity.isDestroyed();
+
+
+			if (relaunchExisting) {
+				intent = new Intent(backgroundActivity, PresentationActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			} else {
+				intent = new Intent(unityActivity, PresentationActivity.class);
+			}
+
+			intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+			intent.putExtra(PresentationActivity.EXTRA_PRODUCT_ID, productId);
+			intent.putExtra(PresentationActivity.EXTRA_PLAN_ID, planId);
+			intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
+			intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+			intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, actionCode);
+
+			unityActivity.startActivity(intent);
+			return relaunchExisting;
+		}
 	}
 }

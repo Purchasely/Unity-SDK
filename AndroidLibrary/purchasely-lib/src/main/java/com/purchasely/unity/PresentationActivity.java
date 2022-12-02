@@ -3,9 +3,12 @@ package com.purchasely.unity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.lang.ref.WeakReference;
 
 import io.purchasely.ext.PLYPresentationViewProperties;
 import io.purchasely.ext.PLYProductViewResult;
@@ -38,21 +41,29 @@ public class PresentationActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 
 		int code = intent.getIntExtra(EXTRA_ACTION_CODE, -1);
+
+		String placementId = intent.getStringExtra(EXTRA_PLACEMENT_ID);
+		String contentId = intent.getStringExtra(EXTRA_CONTENT_ID);
+		String presentationId = intent.getStringExtra(EXTRA_PRESENTATION_ID);
+		String productId = intent.getStringExtra(EXTRA_PRODUCT_ID);
+		String planId = intent.getStringExtra(EXTRA_PLAN_ID);
+
+		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
+				placementId, presentationId, productId, planId, contentId, true,
+				contentLoadedCallback(), viewClosedCallback());
+
+		FrameLayout frameLayout = findViewById(R.id.content);
+
 		switch (code) {
 			case CODE_PRESENTATION: {
-				showPresentationViewForPlacement(intent);
+				frameLayout.addView(Purchasely.presentationViewForPlacement(this, placementId, contentId,
+						contentLoadedCallback(), viewClosedCallback(), productViewResultCallback()));
 				break;
 			}
-			case CODE_PLACEMENT: {
-				showPresentationViewForPresentation(intent);
-				break;
-			}
-			case CODE_PRODUCT: {
-				showPresentationViewForProduct(intent);
-				break;
-			}
+			case CODE_PLACEMENT:
+			case CODE_PRODUCT:
 			case CODE_PLAN: {
-				showPresentationViewForPlan(intent);
+				frameLayout.addView(Purchasely.presentationView(this, properties, productViewResultCallback()));
 				break;
 			}
 			default: {
@@ -60,67 +71,20 @@ public class PresentationActivity extends AppCompatActivity {
 				break;
 			}
 		}
-	}
 
-	private void showPresentationViewForPlacement(Intent intent) {
-		String placementId = intent.getStringExtra(EXTRA_PLACEMENT_ID);
-		String contentId = intent.getStringExtra(EXTRA_CONTENT_ID);
+		PurchaselyBridge.PresentationActivityCache cache = new PurchaselyBridge.PresentationActivityCache();
 
-		if (contentId.isEmpty())
-			contentId = null;
+		cache.presentationId = presentationId;
+		cache.placementId = placementId;
+		cache.productId = productId;
+		cache.planId = planId;
+		cache.contentId = contentId;
 
-		Purchasely.presentationViewForPlacement(this, placementId, contentId,
-				contentLoadedCallback(), viewClosedCallback(), productViewResultCallback());
-	}
+		cache.actionCode = code;
 
-	private void showPresentationViewForPresentation(Intent intent) {
-		String presentationId = intent.getStringExtra(EXTRA_PRESENTATION_ID);
-		String contentId = intent.getStringExtra(EXTRA_CONTENT_ID);
+		cache.activity = new WeakReference<>(this);
 
-		if (contentId.isEmpty())
-			contentId = null;
-
-		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
-				null, presentationId, null, null, contentId, true,
-				contentLoadedCallback(), viewClosedCallback());
-
-		Purchasely.presentationView(this, properties, productViewResultCallback());
-	}
-
-	private void showPresentationViewForProduct(Intent intent) {
-		String productId = intent.getStringExtra(EXTRA_PRODUCT_ID);
-		String presentationId = intent.getStringExtra(EXTRA_PRESENTATION_ID);
-		String contentId = intent.getStringExtra(EXTRA_CONTENT_ID);
-
-		if (presentationId.isEmpty())
-			presentationId = null;
-
-		if (contentId.isEmpty())
-			contentId = null;
-
-		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
-				null, presentationId, productId, null, contentId, true,
-				contentLoadedCallback(), viewClosedCallback());
-
-		Purchasely.presentationView(this, properties, productViewResultCallback());
-	}
-
-	private void showPresentationViewForPlan(Intent intent) {
-		String planId = intent.getStringExtra(EXTRA_PLAN_ID);
-		String presentationId = intent.getStringExtra(EXTRA_PRESENTATION_ID);
-		String contentId = intent.getStringExtra(EXTRA_CONTENT_ID);
-
-		if (presentationId.isEmpty())
-			presentationId = null;
-
-		if (contentId.isEmpty())
-			contentId = null;
-
-		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
-				null, presentationId, null, planId, contentId, true,
-				contentLoadedCallback(), viewClosedCallback());
-
-		Purchasely.presentationView(this, properties, productViewResultCallback());
+		PurchaselyBridge.presentationActivityCache = cache;
 	}
 
 	private Function1<Boolean, Unit> contentLoadedCallback() {
@@ -147,5 +111,11 @@ public class PresentationActivity extends AppCompatActivity {
 					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
 			return null;
 		};
+	}
+
+	@Override
+	protected void onDestroy() {
+		PurchaselyBridge.presentationActivityCache.activity = null;
+		super.onDestroy();
 	}
 }
