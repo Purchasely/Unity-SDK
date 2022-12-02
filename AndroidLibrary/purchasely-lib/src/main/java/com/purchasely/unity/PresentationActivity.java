@@ -53,6 +53,7 @@ public class PresentationActivity extends AppCompatActivity {
 				contentLoadedCallback(), viewClosedCallback());
 
 		FrameLayout frameLayout = findViewById(R.id.content);
+		frameLayout.removeAllViews();
 
 		switch (code) {
 			case CODE_PRESENTATION: {

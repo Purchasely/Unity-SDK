@@ -19,11 +19,9 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYProcessActionListener;
@@ -334,7 +332,7 @@ public class PurchaselyBridge {
 
 	@Keep
 	public void setUserAttributeWithDate(String key, String value) {
-		DateFormat dateFormat = getIso8601Format();
+		DateFormat dateFormat = Utils.getIso8601Format();
 		try {
 			Date date = dateFormat.parse(value);
 			if (date != null)
@@ -361,7 +359,7 @@ public class PurchaselyBridge {
 			return "";
 
 		if (attribute instanceof Date) {
-			DateFormat dateFormat = getIso8601Format();
+			DateFormat dateFormat = Utils.getIso8601Format();
 			return dateFormat.format(attribute);
 		}
 
@@ -430,7 +428,7 @@ public class PurchaselyBridge {
 		Activity unityActivitySaved = unityActivity.get();
 
 		Activity currentActivity = purchaselyActivity != null ? purchaselyActivity : unityActivitySaved;
-		Intent intent = new Intent(currentActivity, unityActivity.getClass());
+		Intent intent = new Intent(currentActivity, unityActivitySaved.getClass());
 		intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		unityActivitySaved.startActivity(intent);
 	}
@@ -488,13 +486,6 @@ public class PurchaselyBridge {
 			_restoreProductsProxy = null;
 			return null;
 		};
-	}
-
-	private DateFormat getIso8601Format() {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-		return dateFormat;
 	}
 
 	protected void finalize() {

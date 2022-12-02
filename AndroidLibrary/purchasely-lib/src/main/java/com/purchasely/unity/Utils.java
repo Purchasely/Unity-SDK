@@ -3,8 +3,12 @@ package com.purchasely.unity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import io.purchasely.billing.Store;
 import io.purchasely.ext.LogLevel;
@@ -89,5 +93,12 @@ public class Utils {
 			result.put(new JSONObject(subscriptions.get(i).toMap()));
 		}
 		return result.toString();
+	}
+
+	static DateFormat getIso8601Format() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+		return dateFormat;
 	}
 }
