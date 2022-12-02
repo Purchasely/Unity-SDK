@@ -1,13 +1,10 @@
 package com.purchasely.unity;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.purchasely.billing.Store;
 import io.purchasely.ext.LogLevel;
@@ -16,7 +13,6 @@ import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.models.PLYPlan;
 import io.purchasely.models.PLYProduct;
-import io.purchasely.models.PLYSubscription;
 import io.purchasely.models.PLYSubscriptionData;
 
 public class Utils {
@@ -66,38 +62,32 @@ public class Utils {
 	}
 
 	static String serializePlan(PLYPlan plan) {
-		Gson gson = new Gson();
-		Type type = new TypeToken<Map<String, Object>>(){}.getType();
-		return gson.toJson(plan.toMap(), type);
+		if (plan == null)
+			return "";
+
+		return new JSONObject(plan.toMap()).toString();
 	}
 
 	static String serializeProduct(PLYProduct product) {
-		Gson gson = new Gson();
-		Type type = new TypeToken<Map<String, Object>>(){}.getType();
-		return gson.toJson(product.toMap(), type);
+		if (product == null)
+			return "";
+
+		return new JSONObject(product.toMap()).toString();
 	}
 
 	static String serializeProducts(List<PLYProduct> products) {
-		Gson gson = new Gson();
-		Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
-
-		ArrayList<Map<String, Object>> maps = new ArrayList<>();
-		for (PLYProduct product : products) {
-			maps.add(product.toMap());
+		JSONArray result = new JSONArray();
+		for (int i = 0; i < products.size(); i++) {
+			result.put(new JSONObject(products.get(i).toMap()));
 		}
-
-		return gson.toJson(maps, type);
+		return result.toString();
 	}
 
 	static String serializeSubscriptions(List<PLYSubscriptionData> subscriptions) {
-		Gson gson = new Gson();
-		Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
-
-		ArrayList<Map<String, Object>> maps = new ArrayList<>();
-		for (PLYSubscriptionData subscriptionData : subscriptions) {
-			maps.add(subscriptionData.toMap());
+		JSONArray result = new JSONArray();
+		for (int i = 0; i < subscriptions.size(); i++) {
+			result.put(new JSONObject(subscriptions.get(i).toMap()));
 		}
-
-		return gson.toJson(maps, type);
+		return result.toString();
 	}
 }
