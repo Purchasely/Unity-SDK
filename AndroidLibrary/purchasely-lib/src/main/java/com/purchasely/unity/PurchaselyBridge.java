@@ -499,6 +499,10 @@ public class PurchaselyBridge {
 
 	protected void finalize() {
 		placementContentProxy = null;
+		processActionListener = null;
+		paywallAction = null;
+		unityActivity = null;
+		presentationActivityCache = null;
 		Purchasely.close();
 	}
 
