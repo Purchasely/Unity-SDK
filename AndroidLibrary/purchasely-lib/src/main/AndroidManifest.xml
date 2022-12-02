@@ -5,9 +5,11 @@
     <application>
         <activity
             android:name=".SubscriptionsActivity"
+            android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
         <activity
             android:name=".PresentationActivity"
+            android:theme="@style/Theme.AppCompat.Light"
             android:exported="true" />
     </application>
 
