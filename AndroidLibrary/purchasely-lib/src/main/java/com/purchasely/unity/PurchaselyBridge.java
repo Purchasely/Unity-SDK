@@ -7,7 +7,6 @@ import android.util.Log;
 
 import androidx.annotation.Keep;
 
-import com.google.gson.Gson;
 import com.purchasely.unity.proxy.EventProxy;
 import com.purchasely.unity.proxy.PlacementContentProxy;
 import com.purchasely.unity.proxy.JsonErrorProxy;
@@ -94,12 +93,12 @@ public class PurchaselyBridge {
 	                                    PlacementContentProxy proxy, String contentId) {
 		placementContentProxy = proxy;
 
-		Intent intent = new Intent(activity, PurchaselyActivity.class);
+		Intent intent = new Intent(activity, PresentationActivity.class);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PLACEMENT);
+		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLACEMENT);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_PLACEMENT_ID, placementId);
-		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+		intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
+		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -109,12 +108,12 @@ public class PurchaselyBridge {
 	                                       PlacementContentProxy proxy, String contentId) {
 		placementContentProxy = proxy;
 
-		Intent intent = new Intent(activity, PurchaselyActivity.class);
+		Intent intent = new Intent(activity, PresentationActivity.class);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PRESENTATION);
+		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -124,13 +123,13 @@ public class PurchaselyBridge {
 	                                  PlacementContentProxy proxy, String contentId, String presentationId) {
 		placementContentProxy = proxy;
 
-		Intent intent = new Intent(activity, PurchaselyActivity.class);
+		Intent intent = new Intent(activity, PresentationActivity.class);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PRODUCT);
+		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRODUCT);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_PRODUCT_ID, productId);
-		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+		intent.putExtra(PresentationActivity.EXTRA_PRODUCT_ID, productId);
+		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -140,13 +139,13 @@ public class PurchaselyBridge {
 	                               PlacementContentProxy proxy, String contentId, String presentationId) {
 		placementContentProxy = proxy;
 
-		Intent intent = new Intent(activity, PurchaselyActivity.class);
+		Intent intent = new Intent(activity, PresentationActivity.class);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_ACTION_CODE, PurchaselyActivity.CODE_PLAN);
+		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLAN);
 
-		intent.putExtra(PurchaselyActivity.EXTRA_PLAN_ID, planId);
-		intent.putExtra(PurchaselyActivity.EXTRA_PRESENTATION_ID, presentationId);
-		intent.putExtra(PurchaselyActivity.EXTRA_CONTENT_ID, contentId);
+		intent.putExtra(PresentationActivity.EXTRA_PLAN_ID, planId);
+		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
+		intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
 
 		activity.startActivity(intent);
 	}
@@ -281,8 +280,9 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void presentSubscriptions() {
-		// TODO:
+	public void presentSubscriptions(Activity activity) {
+		Intent intent = new Intent(activity, SubscriptionsActivity.class);
+		activity.startActivity(intent);
 	}
 
 	@Keep

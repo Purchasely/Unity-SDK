@@ -16,7 +16,7 @@ import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 
-public class PurchaselyActivity extends AppCompatActivity {
+public class PresentationActivity extends AppCompatActivity {
 	final static String EXTRA_PLACEMENT_ID = "EXTRA_PLACEMENT_ID";
 	final static String EXTRA_CONTENT_ID = "EXTRA_CONTENT_ID";
 	final static String EXTRA_PRESENTATION_ID = "EXTRA_PRESENTATION_ID";
@@ -33,7 +33,7 @@ public class PurchaselyActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.purchasely_activity);
+		setContentView(R.layout.activity_presentation);
 
 		Intent intent = getIntent();
 
