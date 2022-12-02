@@ -97,7 +97,6 @@ public class PresentationActivity extends AppCompatActivity {
 	private Function0<Unit> viewClosedCallback() {
 		return () -> {
 			PurchaselyBridge.placementContentProxy.onContentClosed();
-			PurchaselyBridge.placementContentProxy = null;
 
 			((ViewGroup) findViewById(R.id.content)).removeAllViews();
 			supportFinishAfterTransition();
