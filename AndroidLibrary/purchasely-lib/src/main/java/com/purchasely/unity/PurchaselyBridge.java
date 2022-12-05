@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYProcessActionListener;
@@ -68,8 +69,15 @@ public class PurchaselyBridge {
 				.logLevel(Utils.parseLogLevel(logLevel))
 				.runningMode(Utils.parseMode(runningMode))
 				.stores(Utils.parseStoreFlags(storeFlags))
-				.eventListener(plyEvent ->
-						_eventProxy.onEventReceived(plyEvent.getName(), plyEvent.getProperties().toJson()));
+				.eventListener(plyEvent -> {
+					Map<String, Object> eventMap = plyEvent.getProperties().toMap();
+					if (eventMap == null)
+						eventMap = new HashMap<>();
+
+					eventMap.put("name", plyEvent.getName());
+					_eventProxy.onEventReceived(new JSONObject(eventMap).toString());
+				});
+
 
 		if (!userId.isEmpty())
 			builder = builder.userId(userId);
@@ -404,7 +412,8 @@ public class PurchaselyBridge {
 					infoMap.put("presentationId", info.getPresentationId());
 				if (info.getPlacementId() != null)
 					infoMap.put("placementId", info.getPlacementId());
-				if (info.getAbTestId() != null) infoMap.put("abTestId", info.getAbTestId());
+				if (info.getAbTestId() != null)
+					infoMap.put("abTestId", info.getAbTestId());
 				if (info.getAbTestVariantId() != null)
 					infoMap.put("abTestVariantId", info.getAbTestVariantId());
 			}
