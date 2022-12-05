@@ -274,6 +274,12 @@ public class PurchaselyBridge {
 
 		String finalContentId = contentId;
 		Purchasely.plan(planId, plan -> {
+			if (plan == null){
+				_planPurchaseProxy.onError("Could not find plan " + planId);
+				_planPurchaseProxy = null;
+				return null;
+			}
+
 			Purchasely.purchase(activity, plan, finalContentId, plan1 -> {
 				_planPurchaseProxy.onSuccess(Utils.serializePlan(plan1));
 				_planPurchaseProxy = null;
