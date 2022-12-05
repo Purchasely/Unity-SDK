@@ -225,6 +225,12 @@ public class PurchaselyBridge {
 		_productProxy = proxy;
 
 		Purchasely.product(productId, plyProduct -> {
+			if (plyProduct == null){
+				_productProxy.onError("Could not find product " + productId);
+				_productProxy = null;
+				return null;
+			}
+
 			_productProxy.onSuccess(Utils.serializeProduct(plyProduct));
 			_productProxy = null;
 			return null;
@@ -240,6 +246,12 @@ public class PurchaselyBridge {
 		_planProxy = planProxy;
 
 		Purchasely.plan(planId, plan -> {
+			if (plan == null){
+				_planProxy.onError("Could not find plan " + planId);
+				_planProxy = null;
+				return null;
+			}
+
 			_planProxy.onSuccess(Utils.serializePlan(plan));
 			_planProxy = null;
 			return null;
