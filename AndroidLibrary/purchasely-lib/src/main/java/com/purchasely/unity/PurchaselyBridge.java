@@ -405,43 +405,8 @@ public class PurchaselyBridge {
 			processActionListener = plyProcessActionListener;
 			paywallAction = plyPresentationAction;
 
-			Uri url = map.getUrl();
-			String urlString = "";
-			if (url != null) {
-				urlString = url.toString();
-			}
-
-			HashMap<String, Object> parameters = new HashMap<>();
-			parameters.put("title", map.getTitle());
-			parameters.put("url", urlString);
-
-			PLYPlan plan = map.getPlan();
-			if (plan != null)
-				parameters.put("plan", plan.toMap());
-
-			parameters.put("presentation", map.getPresentation());
-
-			HashMap<String, Object> infoMap = new HashMap<>();
-
-			if (info != null) {
-				if (info.getContentId() != null)
-					infoMap.put("contentId", info.getContentId());
-				if (info.getPresentationId() != null)
-					infoMap.put("presentationId", info.getPresentationId());
-				if (info.getPlacementId() != null)
-					infoMap.put("placementId", info.getPlacementId());
-				if (info.getAbTestId() != null)
-					infoMap.put("abTestId", info.getAbTestId());
-				if (info.getAbTestVariantId() != null)
-					infoMap.put("abTestVariantId", info.getAbTestVariantId());
-			}
-
-			HashMap<String, Object> result = new HashMap<>();
-			result.put("info", infoMap);
-			result.put("action", plyPresentationAction.getValue());
-			result.put("parameters", parameters);
-
-			_paywallInterceptorProxy.onAction(new JSONObject(result).toString());
+			String actionJson = Utils.parseActionParameters(info, map, plyPresentationAction);
+			_paywallInterceptorProxy.onAction(actionJson);
 			closePaywall();
 		});
 	}

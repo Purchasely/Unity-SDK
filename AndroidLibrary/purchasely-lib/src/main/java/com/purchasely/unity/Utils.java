@@ -1,22 +1,32 @@
 package com.purchasely.unity;
 
+import android.net.Uri;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import io.purchasely.billing.Store;
 import io.purchasely.ext.LogLevel;
+import io.purchasely.ext.PLYOfferType;
+import io.purchasely.ext.PLYPresentationAction;
+import io.purchasely.ext.PLYPresentationActionParameters;
+import io.purchasely.ext.PLYPresentationInfo;
 import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
+import io.purchasely.ext.PLYSubscriptionStatus;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.models.PLYPlan;
 import io.purchasely.models.PLYProduct;
+import io.purchasely.models.PLYSubscription;
 import io.purchasely.models.PLYSubscriptionData;
 
 public class Utils {
@@ -87,10 +97,77 @@ public class Utils {
 		return result.toString();
 	}
 
+	static int parseOfferType(PLYOfferType type) {
+		if (type == null)
+			return 0;
+
+		switch (type) {
+			case FREE_TRIAL:
+				return 1;
+			case INTRO_OFFER:
+				return 2;
+			case PROMO_CODE:
+				return 3;
+		}
+
+		return 0;
+	}
+
+	static int parseSubscriptionStatus(PLYSubscriptionStatus status) {
+		if (status == null)
+			return 8;
+
+		switch (status) {
+			case AUTO_RENEWING:
+				return 0;
+			case ON_HOLD:
+				return 1;
+			case IN_GRACE_PERIOD:
+				return 2;
+			case AUTO_RENEWING_CANCELED:
+				return 3;
+			case DEACTIVATED:
+				return 4;
+			case REVOKED:
+				return 5;
+			case PAUSED:
+				return 6;
+			case UNPAID:
+				return 7;
+		}
+
+		return 8;
+	}
+
+	static Map<String, Object> subscriptionToMap(PLYSubscriptionData subscriptionData) {
+		HashMap<String, Object> result = new HashMap<>();
+		result.put("plan", subscriptionData.getPlan().toMap());
+		result.put("product", subscriptionData.getProduct().toMap());
+
+		PLYSubscription subscription = subscriptionData.getData();
+
+		result.put("contentId", subscription.getContentId());
+		result.put("environment", subscription.getEnvironment());
+		result.put("id", subscription.getId());
+		result.put("isFamilyShared", subscription.isFamilyShared());
+		result.put("offerIdentifier", subscription.getOfferIdentifier());
+		result.put("offerType", parseOfferType(subscription.getOfferType()));
+		result.put("originalPurchasedAt", subscription.getOriginalPurchasedAt());
+		result.put("purchaseToken", subscription.getPurchaseToken());
+		result.put("purchasedDate", subscription.getPurchasedAt());
+		result.put("nextRenewalDate", subscription.getNextRenewalAt());
+		result.put("cancelledDate", subscription.getCancelledAt());
+		result.put("storeCountry", subscription.getStoreCountry());
+		result.put("storeType", subscription.getStoreType());
+		result.put("status", parseSubscriptionStatus(subscription.getSubscriptionStatus()));
+
+		return result;
+	}
+
 	static String serializeSubscriptions(List<PLYSubscriptionData> subscriptions) {
 		JSONArray result = new JSONArray();
 		for (int i = 0; i < subscriptions.size(); i++) {
-			result.put(new JSONObject(subscriptions.get(i).toMap()));
+			result.put(subscriptionToMap(subscriptions.get(i)));
 		}
 		return result.toString();
 	}
@@ -100,5 +177,45 @@ public class Utils {
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		return dateFormat;
+	}
+
+	static String parseActionParameters(PLYPresentationInfo info, PLYPresentationActionParameters presentationActionParameters, PLYPresentationAction action) {
+		Uri url = presentationActionParameters.getUrl();
+		String urlString = "";
+		if (url != null) {
+			urlString = url.toString();
+		}
+
+		HashMap<String, Object> parameters = new HashMap<>();
+		parameters.put("title", presentationActionParameters.getTitle());
+		parameters.put("url", urlString);
+
+		PLYPlan plan = presentationActionParameters.getPlan();
+		if (plan != null)
+			parameters.put("plan", plan.toMap());
+
+		parameters.put("presentation", presentationActionParameters.getPresentation());
+
+		HashMap<String, Object> infoMap = new HashMap<>();
+
+		if (info != null) {
+			if (info.getContentId() != null)
+				infoMap.put("contentId", info.getContentId());
+			if (info.getPresentationId() != null)
+				infoMap.put("presentationId", info.getPresentationId());
+			if (info.getPlacementId() != null)
+				infoMap.put("placementId", info.getPlacementId());
+			if (info.getAbTestId() != null)
+				infoMap.put("abTestId", info.getAbTestId());
+			if (info.getAbTestVariantId() != null)
+				infoMap.put("abTestVariantId", info.getAbTestVariantId());
+		}
+
+		HashMap<String, Object> result = new HashMap<>();
+		result.put("info", infoMap);
+		result.put("action", action.getValue());
+		result.put("parameters", parameters);
+
+		return new JSONObject(result).toString();
 	}
 }
