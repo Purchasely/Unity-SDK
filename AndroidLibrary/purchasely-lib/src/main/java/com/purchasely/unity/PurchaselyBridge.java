@@ -311,8 +311,8 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void handleDeepLinkUrl(String url) {
-		Purchasely.handle(Uri.parse(url));
+	public boolean handleDeepLinkUrl(String url) {
+		return Purchasely.handle(Uri.parse(url));
 	}
 
 	@Keep
