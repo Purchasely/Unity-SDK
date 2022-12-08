@@ -225,7 +225,7 @@ public class PurchaselyBridge {
 		_productProxy = proxy;
 
 		Purchasely.product(productId, plyProduct -> {
-			if (plyProduct == null){
+			if (plyProduct == null) {
 				_productProxy.onError("Could not find product " + productId);
 				_productProxy = null;
 				return null;
@@ -246,7 +246,7 @@ public class PurchaselyBridge {
 		_planProxy = planProxy;
 
 		Purchasely.plan(planId, plan -> {
-			if (plan == null){
+			if (plan == null) {
 				_planProxy.onError("Could not find plan " + planId);
 				_planProxy = null;
 				return null;
@@ -286,7 +286,7 @@ public class PurchaselyBridge {
 
 		String finalContentId = contentId;
 		Purchasely.plan(planId, plan -> {
-			if (plan == null){
+			if (plan == null) {
 				_planPurchaseProxy.onError("Could not find plan " + planId);
 				_planPurchaseProxy = null;
 				return null;
