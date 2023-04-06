@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.Keep;
 
 import com.purchasely.unity.proxy.EventProxy;
+import com.purchasely.unity.proxy.FetchPresentationProxy;
 import com.purchasely.unity.proxy.PaywallInterceptorProxy;
 import com.purchasely.unity.proxy.PlacementContentProxy;
 import com.purchasely.unity.proxy.JsonErrorProxy;
@@ -46,7 +47,7 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
-	private JsonErrorProxy _presentationProxy;
+	private FetchPresentationProxy _presentationProxy;
 	private PaywallInterceptorProxy _paywallInterceptorProxy;
 
 	private PLYProcessActionListener processActionListener;
@@ -414,17 +415,17 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void fetchPresentation(String presentationId, String contentId, JsonErrorProxy presentationProxy, PlacementContentProxy presentationResultProxy) {
+	public void fetchPresentation(Activity activity, String presentationId, String contentId,
+	                              FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
-		_presentationResultProxy = presentationResultProxy;
 
 		//TODO: implement
 	}
 
 	@Keep
-	public void fetchPresentationForPlacement(String placementId, String contentId, JsonErrorProxy presentationProxy, PlacementContentProxy presentationResultProxy) {
+	public void fetchPresentationForPlacement(Activity activity, String placementId, String contentId,
+	                                          FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
-		_presentationResultProxy = presentationResultProxy;
 
 		//TODO: implement
 	}
@@ -437,6 +438,11 @@ public class PurchaselyBridge {
 	@Keep
 	public void clientPresentationClosed(PLYPresentation presentation) {
 		Purchasely.clientPresentationClosed(presentation);
+	}
+
+	@Keep
+	public void showContentForPresentation(Activity activity, PLYPresentation presentation) {
+		//TODO: implement
 	}
 
 	private void closePaywall() {
