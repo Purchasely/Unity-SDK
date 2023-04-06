@@ -58,8 +58,8 @@ public class Utils {
 			return PLYRunningMode.Observer.INSTANCE;
 		if (mode == 1)
 			return PLYRunningMode.PaywallObserver.INSTANCE;
-		if (mode == 2)
-			return PLYRunningMode.PaywallOnly.INSTANCE;
+//		if (mode == 2)
+//			return PLYRunningMode.PaywallOnly.INSTANCE;
 		if (mode == 3)
 			return PLYRunningMode.TransactionOnly.INSTANCE;
 
