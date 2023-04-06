@@ -78,7 +78,7 @@ public class PresentationActivity extends AppCompatActivity {
 				}
 
 				frameLayout.addView(presentation.buildView(this, properties,
-						PurchaselyBridge.productViewResultCallbackLoadedPresentation()));
+						productViewResultCallback()));
 				break;
 			default: {
 				finish();
@@ -112,6 +112,7 @@ public class PresentationActivity extends AppCompatActivity {
 	private Function1<Boolean, Unit> contentLoadedCallback() {
 		return isLoaded -> {
 			PurchaselyBridge.placementContentProxy.onContentLoaded(isLoaded);
+
 			return null;
 		};
 	}

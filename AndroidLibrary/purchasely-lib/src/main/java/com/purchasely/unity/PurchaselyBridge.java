@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import androidx.annotation.Keep;
 
@@ -52,7 +51,7 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
-	private static FetchPresentationProxy _presentationProxy;
+	static FetchPresentationProxy _presentationProxy;
 	private PaywallInterceptorProxy _paywallInterceptorProxy;
 
 	private PLYProcessActionListener processActionListener;
@@ -423,26 +422,26 @@ public class PurchaselyBridge {
 	public void fetchPresentation(Activity activity, String presentationId, String contentId,
 	                              FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
+		placementContentProxy = presentationProxy;
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				null, presentationId, null, null, contentId, true,
 				contentLoadedCallback(), viewClosedCallback(), null, null);
 
-		Purchasely.fetchPresentation(activity, properties,
-				productViewResultCallbackLoadedPresentation(), fetchPresentationCallback());
+		Purchasely.fetchPresentation(activity, properties, null, fetchPresentationCallback());
 	}
 
 	@Keep
 	public void fetchPresentationForPlacement(Activity activity, String placementId, String contentId,
 	                                          FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
+		placementContentProxy = presentationProxy;
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				placementId, null, null, null, contentId, true,
 				contentLoadedCallback(), viewClosedCallback(), null, null);
 
-		Purchasely.fetchPresentation(activity, properties,
-				productViewResultCallbackLoadedPresentation(), fetchPresentationCallback());
+		Purchasely.fetchPresentation(activity, properties, null, fetchPresentationCallback());
 	}
 
 	@Keep
@@ -457,7 +456,16 @@ public class PurchaselyBridge {
 
 	@Keep
 	public void showContentForPresentation(Activity activity, PLYPresentation presentation) {
-		//TODO: implement
+		Intent intent = new Intent(activity, PresentationActivity.class);
+
+		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION_WITH_VIEW);
+
+		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentation.getId());
+		intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, presentation.getPlacementId());
+
+		intent.putExtra(PresentationActivity.EXTRA_PRESENTATION, presentation);
+
+		activity.startActivity(intent);
 	}
 
 	private void closePaywall() {
@@ -552,9 +560,9 @@ public class PurchaselyBridge {
 		};
 	}
 
-	public static Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallbackLoadedPresentation() {
+	public static Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
 		return (plyProductViewResult, plyPlan) -> {
-			_presentationProxy.onPresentationResult(
+			placementContentProxy.onPresentationResult(
 					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
 			return null;
 		};
