@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYProcessActionListener;
 import io.purchasely.ext.Purchasely;
@@ -45,6 +46,7 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
+	private JsonErrorProxy _presentationProxy;
 	private PaywallInterceptorProxy _paywallInterceptorProxy;
 
 	private PLYProcessActionListener processActionListener;
@@ -409,6 +411,32 @@ public class PurchaselyBridge {
 			_paywallInterceptorProxy.onAction(actionJson);
 			closePaywall();
 		});
+	}
+
+	@Keep
+	public void fetchPresentation(String presentationId, String contentId, JsonErrorProxy presentationProxy, PlacementContentProxy presentationResultProxy) {
+		_presentationProxy = presentationProxy;
+		_presentationResultProxy = presentationResultProxy;
+
+		//TODO: implement
+	}
+
+	@Keep
+	public void fetchPresentationForPlacement(String placementId, String contentId, JsonErrorProxy presentationProxy, PlacementContentProxy presentationResultProxy) {
+		_presentationProxy = presentationProxy;
+		_presentationResultProxy = presentationResultProxy;
+
+		//TODO: implement
+	}
+
+	@Keep
+	public void clientPresentationOpened(PLYPresentation presentation) {
+		Purchasely.clientPresentationDisplayed(presentation);
+	}
+
+	@Keep
+	public void clientPresentationClosed(PLYPresentation presentation) {
+		Purchasely.clientPresentationClosed(presentation);
 	}
 
 	private void closePaywall() {
