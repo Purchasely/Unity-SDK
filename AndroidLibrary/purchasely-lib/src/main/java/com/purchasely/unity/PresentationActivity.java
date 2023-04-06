@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.ref.WeakReference;
 
+import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationViewProperties;
 import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.Purchasely;
@@ -25,9 +26,11 @@ public class PresentationActivity extends AppCompatActivity {
 	final static String EXTRA_PRESENTATION_ID = "EXTRA_PRESENTATION_ID";
 	final static String EXTRA_PRODUCT_ID = "EXTRA_PRODUCT_ID";
 	final static String EXTRA_PLAN_ID = "EXTRA_PLAN_ID";
+	final static String EXTRA_PRESENTATION = "EXTRA_PRESENTATION";
 
 	final static String EXTRA_ACTION_CODE = "EXTRA_ACTION_CODE";
 
+	final static int CODE_PRESENTATION_WITH_VIEW = 111;
 	final static int CODE_PRESENTATION = 112;
 	final static int CODE_PLACEMENT = 113;
 	final static int CODE_PRODUCT = 114;
@@ -67,6 +70,16 @@ public class PresentationActivity extends AppCompatActivity {
 				frameLayout.addView(Purchasely.presentationView(this, properties, productViewResultCallback()));
 				break;
 			}
+			case CODE_PRESENTATION_WITH_VIEW:
+				PLYPresentation presentation = intent.getParcelableExtra(EXTRA_PRESENTATION);
+				if (presentation == null) {
+					finish();
+					return;
+				}
+
+				frameLayout.addView(presentation.buildView(this, properties,
+						PurchaselyBridge.productViewResultCallbackLoadedPresentation()));
+				break;
 			default: {
 				finish();
 				break;
@@ -88,6 +101,14 @@ public class PresentationActivity extends AppCompatActivity {
 		PurchaselyBridge.presentationActivityCache = cache;
 	}
 
+	private Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
+		return (plyProductViewResult, plyPlan) -> {
+			PurchaselyBridge.placementContentProxy.onPresentationResult(
+					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
+			return null;
+		};
+	}
+
 	private Function1<Boolean, Unit> contentLoadedCallback() {
 		return isLoaded -> {
 			PurchaselyBridge.placementContentProxy.onContentLoaded(isLoaded);
@@ -101,14 +122,6 @@ public class PresentationActivity extends AppCompatActivity {
 
 			((ViewGroup) findViewById(R.id.content)).removeAllViews();
 			supportFinishAfterTransition();
-			return null;
-		};
-	}
-
-	private Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
-		return (plyProductViewResult, plyPlan) -> {
-			PurchaselyBridge.placementContentProxy.onPresentationResult(
-					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
 			return null;
 		};
 	}

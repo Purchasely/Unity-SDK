@@ -1,5 +1,7 @@
 package com.purchasely.unity;
 
+import static io.purchasely.ext.PLYPresentationType.*;
+
 import android.net.Uri;
 
 import org.json.JSONArray;
@@ -17,9 +19,11 @@ import java.util.TimeZone;
 import io.purchasely.billing.Store;
 import io.purchasely.ext.LogLevel;
 import io.purchasely.ext.PLYOfferType;
+import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYPresentationActionParameters;
 import io.purchasely.ext.PLYPresentationInfo;
+import io.purchasely.ext.PLYPresentationType;
 import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.ext.PLYSubscriptionStatus;
@@ -215,6 +219,51 @@ public class Utils {
 		result.put("info", infoMap);
 		result.put("action", action.getValue());
 		result.put("parameters", parameters);
+
+		return new JSONObject(result).toString();
+	}
+
+	static String parsePresentation(PLYPresentation presentation) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		if (presentation.getId() != null)
+			result.put("id", presentation.getId());
+		if (presentation.getLanguage() != null)
+			result.put("language", presentation.getLanguage());
+		if (presentation.getPlacementId() != null)
+			result.put("placementId", presentation.getPlacementId());
+		if (presentation.getAudienceId() != null)
+			result.put("audienceId", presentation.getAudienceId());
+		if (presentation.getAbTestId() != null)
+			result.put("abTestId", presentation.getAbTestId());
+		if (presentation.getAbTestVariantId() != null)
+			result.put("abTestVariantId", presentation.getAbTestVariantId());
+
+		JSONArray plans = new JSONArray();
+		for (int i = 0; i < presentation.getPlans().size(); i++) {
+			plans.put(presentation.getPlans().get(i));
+		}
+
+		result.put("plans", plans.toString());
+
+		String typeString = "unknown";
+
+		switch (presentation.getType()) {
+			case NORMAL:
+				typeString = "normal";
+				break;
+			case FALLBACK:
+				typeString = "fallback";
+				break;
+			case DEACTIVATED:
+				typeString = "deactivated";
+				break;
+			case CLIENT:
+				typeString = "client";
+				break;
+		}
+
+		result.put("type", typeString);
 
 		return new JSONObject(result).toString();
 	}

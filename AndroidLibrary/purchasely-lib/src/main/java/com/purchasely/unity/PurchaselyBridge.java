@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.view.ViewGroup;
 
 import androidx.annotation.Keep;
 
@@ -27,12 +28,16 @@ import java.util.Map;
 
 import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationAction;
+import io.purchasely.ext.PLYPresentationViewProperties;
 import io.purchasely.ext.PLYProcessActionListener;
+import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
 import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 
 @Keep
 public class PurchaselyBridge {
@@ -47,7 +52,7 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
-	private FetchPresentationProxy _presentationProxy;
+	private static FetchPresentationProxy _presentationProxy;
 	private PaywallInterceptorProxy _paywallInterceptorProxy;
 
 	private PLYProcessActionListener processActionListener;
@@ -419,7 +424,12 @@ public class PurchaselyBridge {
 	                              FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
 
-		//TODO: implement
+		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
+				null, presentationId, null, null, contentId, true,
+				contentLoadedCallback(), viewClosedCallback(), null, null);
+
+		Purchasely.fetchPresentation(activity, properties,
+				productViewResultCallbackLoadedPresentation(), fetchPresentationCallback());
 	}
 
 	@Keep
@@ -427,7 +437,12 @@ public class PurchaselyBridge {
 	                                          FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
 
-		//TODO: implement
+		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
+				placementId, null, null, null, contentId, true,
+				contentLoadedCallback(), viewClosedCallback(), null, null);
+
+		Purchasely.fetchPresentation(activity, properties,
+				productViewResultCallbackLoadedPresentation(), fetchPresentationCallback());
 	}
 
 	@Keep
@@ -521,6 +536,42 @@ public class PurchaselyBridge {
 		unityActivity = null;
 		presentationActivityCache = null;
 		Purchasely.close();
+	}
+
+	private Function1<Boolean, Unit> contentLoadedCallback() {
+		return isLoaded -> {
+			_presentationProxy.onContentLoaded(isLoaded);
+			return null;
+		};
+	}
+
+	private Function0<Unit> viewClosedCallback() {
+		return () -> {
+			_presentationProxy.onContentClosed();
+			return null;
+		};
+	}
+
+	public static Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallbackLoadedPresentation() {
+		return (plyProductViewResult, plyPlan) -> {
+			_presentationProxy.onPresentationResult(
+					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
+			return null;
+		};
+	}
+
+	private Function2<PLYPresentation, PLYError, Unit> fetchPresentationCallback() {
+		return (presentation, error) -> {
+			if (error != null) {
+				_presentationProxy.onError(error.getMessage());
+			}
+
+			if (presentation != null) {
+				_presentationProxy.onPresentationFetched(Utils.parsePresentation(presentation), presentation);
+			}
+
+			return null;
+		};
 	}
 
 	static class PresentationActivityCache {
