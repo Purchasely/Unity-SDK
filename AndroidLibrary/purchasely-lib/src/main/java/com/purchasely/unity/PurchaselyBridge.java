@@ -33,7 +33,6 @@ import io.purchasely.ext.Purchasely;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
 import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
 
@@ -50,7 +49,7 @@ public class PurchaselyBridge {
 	private JsonErrorProxy _allProductsProxy;
 	private JsonErrorProxy _planPurchaseProxy;
 	private JsonErrorProxy _userSubscriptionsProxy;
-	static FetchPresentationProxy _presentationProxy;
+	private FetchPresentationProxy _presentationProxy;
 	private PaywallInterceptorProxy _paywallInterceptorProxy;
 
 	private PLYProcessActionListener processActionListener;
@@ -421,11 +420,10 @@ public class PurchaselyBridge {
 	public void fetchPresentation(Activity activity, String presentationId, String contentId,
 	                              FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
-		placementContentProxy = presentationProxy;
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				null, presentationId, null, null, contentId, true,
-				contentLoadedCallback(), viewClosedCallback(), null, null);
+				null, null, null, null);
 
 		Purchasely.fetchPresentation(activity, properties, null, fetchPresentationCallback());
 	}
@@ -434,11 +432,10 @@ public class PurchaselyBridge {
 	public void fetchPresentationForPlacement(Activity activity, String placementId, String contentId,
 	                                          FetchPresentationProxy presentationProxy) {
 		_presentationProxy = presentationProxy;
-		placementContentProxy = presentationProxy;
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				placementId, null, null, null, contentId, true,
-				contentLoadedCallback(), viewClosedCallback(), null, null);
+				null, null, null, null);
 
 		Purchasely.fetchPresentation(activity, properties, null, fetchPresentationCallback());
 	}
@@ -454,7 +451,10 @@ public class PurchaselyBridge {
 	}
 
 	@Keep
-	public void showContentForPresentation(Activity activity, PLYPresentation presentation) {
+	public void showContentForPresentation(Activity activity, PLYPresentation presentation,
+	                                       PlacementContentProxy proxy) {
+		placementContentProxy = proxy;
+
 		Intent intent = new Intent(activity, PresentationActivity.class);
 
 		intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION_WITH_VIEW);
@@ -544,20 +544,6 @@ public class PurchaselyBridge {
 		unityActivity = null;
 		presentationActivityCache = null;
 		Purchasely.close();
-	}
-
-	private Function1<Boolean, Unit> contentLoadedCallback() {
-		return isLoaded -> {
-			_presentationProxy.onContentLoaded(isLoaded);
-			return null;
-		};
-	}
-
-	private Function0<Unit> viewClosedCallback() {
-		return () -> {
-			_presentationProxy.onContentClosed();
-			return null;
-		};
 	}
 
 	private Function2<PLYPresentation, PLYError, Unit> fetchPresentationCallback() {
