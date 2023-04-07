@@ -29,7 +29,6 @@ import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYPresentationViewProperties;
 import io.purchasely.ext.PLYProcessActionListener;
-import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.Purchasely;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
@@ -539,6 +538,7 @@ public class PurchaselyBridge {
 
 	protected void finalize() {
 		placementContentProxy = null;
+		_presentationProxy = null;
 		processActionListener = null;
 		paywallAction = null;
 		unityActivity = null;
@@ -556,14 +556,6 @@ public class PurchaselyBridge {
 	private Function0<Unit> viewClosedCallback() {
 		return () -> {
 			_presentationProxy.onContentClosed();
-			return null;
-		};
-	}
-
-	public static Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
-		return (plyProductViewResult, plyPlan) -> {
-			placementContentProxy.onPresentationResult(
-					Utils.parseProductViewResult(plyProductViewResult), Utils.serializePlan(plyPlan));
 			return null;
 		};
 	}
