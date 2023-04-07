@@ -3,6 +3,7 @@ package com.purchasely.unity;
 import static io.purchasely.ext.PLYPresentationType.*;
 
 import android.net.Uri;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -224,47 +225,7 @@ public class Utils {
 	}
 
 	static String parsePresentation(PLYPresentation presentation) {
-		HashMap<String, Object> result = new HashMap<>();
-
-		if (presentation.getId() != null)
-			result.put("id", presentation.getId());
-		if (presentation.getLanguage() != null)
-			result.put("language", presentation.getLanguage());
-		if (presentation.getPlacementId() != null)
-			result.put("placementId", presentation.getPlacementId());
-		if (presentation.getAudienceId() != null)
-			result.put("audienceId", presentation.getAudienceId());
-		if (presentation.getAbTestId() != null)
-			result.put("abTestId", presentation.getAbTestId());
-		if (presentation.getAbTestVariantId() != null)
-			result.put("abTestVariantId", presentation.getAbTestVariantId());
-
-		JSONArray plans = new JSONArray();
-		for (int i = 0; i < presentation.getPlans().size(); i++) {
-			plans.put(presentation.getPlans().get(i));
-		}
-
-		result.put("plans", plans.toString());
-
-		String typeString = "unknown";
-
-		switch (presentation.getType()) {
-			case NORMAL:
-				typeString = "normal";
-				break;
-			case FALLBACK:
-				typeString = "fallback";
-				break;
-			case DEACTIVATED:
-				typeString = "deactivated";
-				break;
-			case CLIENT:
-				typeString = "client";
-				break;
-		}
-
-		result.put("type", typeString);
-
-		return new JSONObject(result).toString();
+		Log.d("parsePresentation", presentation.getType().toString());
+		return new JSONObject(presentation.toMap()).toString();
 	}
 }
