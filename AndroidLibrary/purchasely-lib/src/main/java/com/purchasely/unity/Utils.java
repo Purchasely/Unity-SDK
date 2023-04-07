@@ -226,6 +226,10 @@ public class Utils {
 
 	static String parsePresentation(PLYPresentation presentation) {
 		Log.d("parsePresentation", presentation.getType().toString());
-		return new JSONObject(presentation.toMap()).toString();
+
+		Map<String, Object> map = presentation.toMap();
+		map.put("type", presentation.getType().toString().toLowerCase());
+
+		return new JSONObject(map).toString();
 	}
 }

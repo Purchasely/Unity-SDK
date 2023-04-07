@@ -232,16 +232,13 @@ public class PurchaselyBridge {
 		Purchasely.product(productId, plyProduct -> {
 			if (plyProduct == null) {
 				_productProxy.onError("Could not find product " + productId);
-				_productProxy = null;
 				return null;
 			}
 
 			_productProxy.onSuccess(Utils.serializeProduct(plyProduct));
-			_productProxy = null;
 			return null;
 		}, throwable -> {
 			_productProxy.onError(throwable.getMessage());
-			_productProxy = null;
 			return null;
 		});
 	}
@@ -253,16 +250,13 @@ public class PurchaselyBridge {
 		Purchasely.plan(planId, plan -> {
 			if (plan == null) {
 				_planProxy.onError("Could not find plan " + planId);
-				_planProxy = null;
 				return null;
 			}
 
 			_planProxy.onSuccess(Utils.serializePlan(plan));
-			_planProxy = null;
 			return null;
 		}, throwable -> {
 			_planProxy.onError(throwable.getMessage());
-			_planProxy = null;
 			return null;
 		});
 	}
