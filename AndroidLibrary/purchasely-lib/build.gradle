@@ -26,9 +26,9 @@ android {
 }
 
 dependencies {
-    implementation 'io.purchasely:core:3.6.3'
-    implementation 'io.purchasely:player:3.6.3'
-    implementation 'io.purchasely:google-play:3.6.3'
+    api 'io.purchasely:core:3.7.5'
+    api 'io.purchasely:player:3.7.5'
+    api 'io.purchasely:google-play:3.7.5'
 
     implementation "androidx.fragment:fragment:1.5.6"
     implementation "androidx.appcompat:appcompat:1.6.1"
