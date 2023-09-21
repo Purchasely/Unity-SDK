@@ -406,7 +406,6 @@ public class PurchaselyBridge {
 
 			String actionJson = Utils.parseActionParameters(info, map, plyPresentationAction);
 			_paywallInterceptorProxy.onAction(actionJson);
-			closePaywall();
 		});
 	}
 
