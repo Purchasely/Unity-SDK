@@ -59,16 +59,15 @@ public class Utils {
 	}
 
 	static PLYRunningMode parseMode(int mode) {
-		if (mode == 0)
-			return PLYRunningMode.Observer.INSTANCE;
-		if (mode == 1)
-			return PLYRunningMode.PaywallObserver.INSTANCE;
-//		if (mode == 2)
-//			return PLYRunningMode.PaywallOnly.INSTANCE;
-		if (mode == 3)
-			return PLYRunningMode.TransactionOnly.INSTANCE;
-
-		return PLYRunningMode.Full.INSTANCE;
+		switch (mode) {
+			case 0:
+				return PLYRunningMode.Full.INSTANCE;
+			case 1:
+			case 2:
+				return PLYRunningMode.PaywallObserver.INSTANCE;
+			default:
+				return PLYRunningMode.Full.INSTANCE;
+		}
 	}
 
 	static int parseProductViewResult(PLYProductViewResult productViewResult) {

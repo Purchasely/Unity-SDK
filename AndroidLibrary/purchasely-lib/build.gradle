@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace 'com.purchasely.unity'
-    compileSdk 32
+    compileSdkVersion 33
 
     defaultConfig {
         minSdk 21
-        targetSdk 32
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -26,9 +26,9 @@ android {
 }
 
 dependencies {
-    implementation 'io.purchasely:core:3.6.3'
-    implementation 'io.purchasely:player:3.6.3'
-    implementation 'io.purchasely:google-play:3.6.3'
+    api 'io.purchasely:core:4.1.1'
+    api 'io.purchasely:google-play:4.1.1'
+    api 'io.purchasely:player:4.1.1'
 
     implementation "androidx.fragment:fragment:1.5.6"
     implementation "androidx.appcompat:appcompat:1.6.1"
