@@ -16,11 +16,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.Set;
 
 import io.purchasely.billing.Store;
 import io.purchasely.ext.LogLevel;
 import io.purchasely.ext.PLYOfferType;
 import io.purchasely.ext.PLYPresentation;
+import io.purchasely.ext.PLYSubscriptionOffer;
+import io.purchasely.ext.PLYPresentationMetadata;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYPresentationActionParameters;
 import io.purchasely.ext.PLYPresentationInfo;
@@ -30,9 +33,11 @@ import io.purchasely.ext.PLYRunningMode;
 import io.purchasely.ext.PLYSubscriptionStatus;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.models.PLYPlan;
+import io.purchasely.models.PLYPromoOffer;
 import io.purchasely.models.PLYProduct;
 import io.purchasely.models.PLYSubscription;
 import io.purchasely.models.PLYSubscriptionData;
+import io.purchasely.models.PLYPresentationPlan;
 
 public class Utils {
 	static List<Store> parseStoreFlags(int storeFlags) {
@@ -194,11 +199,18 @@ public class Utils {
 		parameters.put("title", presentationActionParameters.getTitle());
 		parameters.put("url", urlString);
 
-		PLYPlan plan = presentationActionParameters.getPlan();
-		if (plan != null)
-			parameters.put("plan", plan.toMap());
+        PLYPlan plan = presentationActionParameters.getPlan();
+        PLYPromoOffer offer = presentationActionParameters.getOffer();
+        PLYSubscriptionOffer subscriptionOffer = presentationActionParameters.getSubscriptionOffer();
 
-		parameters.put("presentation", presentationActionParameters.getPresentation());
+        if (plan != null)
+            parameters.put("plan", plan.toMap());
+
+        if(offer != null)
+            parameters.put("offer", offer != null ? toMap(offer) : null);
+
+        if(subscriptionOffer != null)
+            parameters.put("subscriptionOffer", subscriptionOffer.toMap());
 
 		HashMap<String, Object> infoMap = new HashMap<>();
 
@@ -226,9 +238,51 @@ public class Utils {
 	static String parsePresentation(PLYPresentation presentation) {
 		Log.d("parsePresentation", presentation.getType().toString());
 
-		Map<String, Object> map = presentation.toMap();
-		map.put("type", presentation.getType().toString().toLowerCase());
+        Map<String, Object> map = presentation.toMap();
 
-		return new JSONObject(map).toString();
-	}
+        List<PLYPresentationPlan> plans = presentation.getPlans();
+        List<Map<String, String>> mappedPlans = new ArrayList<>();
+        for (PLYPresentationPlan plan : plans) {
+            mappedPlans.add(toMap(plan));
+        }
+
+        map.put("type", presentation.getType().toString().toLowerCase());
+        map.put("metadata", toMap(presentation.getMetadata()));
+        map.put("plans", mappedPlans);
+
+        return new JSONObject(map).toString();
+    }
+
+    static Map<String, String> toMap(PLYPresentationPlan presentationPlan) {
+        Map<String, String> resultMap = new HashMap<>();
+        if (presentationPlan != null) {
+            resultMap.put("planVendorId", presentationPlan.getPlanVendorId());
+            resultMap.put("storeProductId", presentationPlan.getStoreProductId());
+            resultMap.put("basePlanId", presentationPlan.getBasePlanId());
+            resultMap.put("offerId", presentationPlan.getOfferId());
+        }
+        return resultMap;
+    }
+
+    static Map<String, Object> toMap(PLYPresentationMetadata metadata) {
+        Map<String, Object> result = new HashMap<>();
+        if (metadata != null) {
+            Set<String> keys = metadata.keys();
+            if (keys != null) {
+                for (String key : keys) {
+                    Object value = metadata.get(key);
+                    if (value != null) result.put(key, value);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    static Map<String, String> toMap(PLYPromoOffer offer) {
+        Map<String, String> map = new HashMap<>();
+        map.put("vendorId", offer.getVendorId() != null ? offer.getVendorId() : null);
+        map.put("storeOfferId", offer.getStoreOfferId() != null ? offer.getStoreOfferId() : null);
+        return map;
+    }
 }
