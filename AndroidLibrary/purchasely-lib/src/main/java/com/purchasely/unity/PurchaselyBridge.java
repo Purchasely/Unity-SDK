@@ -498,18 +498,32 @@ public class PurchaselyBridge {
         activity.startActivity(intent);
     }
 
-    private void closePaywall() {
+    private void showPresentation() {
+        Activity activity = unityActivity.get();
+        presentationActivityCache.relaunch(activity);
+    }
+
+    private void closePresentation() {
+        Activity purchaselyActivity = null;
+        if (presentationActivityCache != null && presentationActivityCache.activity != null) {
+            purchaselyActivity = presentationActivityCache.activity.get();
+            purchaselyActivity.finish();
+            presentationActivityCache.activity = null;
+        }
+    }
+
+    private void hidePresentation() {
         Activity purchaselyActivity = null;
         if (presentationActivityCache != null && presentationActivityCache.activity != null) {
             purchaselyActivity = presentationActivityCache.activity.get();
         }
 
         Activity unityActivitySaved = unityActivity.get();
-
         Activity currentActivity = purchaselyActivity != null ? purchaselyActivity : unityActivitySaved;
         Intent intent = new Intent(currentActivity, unityActivitySaved.getClass());
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         unityActivitySaved.startActivity(intent);
+
     }
 
     private Function1<PLYPlan, Unit> purchaseRestoredCallback() {
