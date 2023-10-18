@@ -39,6 +39,9 @@ import io.purchasely.models.PLYSubscription;
 import io.purchasely.models.PLYSubscriptionData;
 import io.purchasely.models.PLYPresentationPlan;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 public class Utils {
 	static List<Store> parseStoreFlags(int storeFlags) {
 		ArrayList<Store> stores = new ArrayList<>();
@@ -270,12 +273,23 @@ public class Utils {
             Set<String> keys = metadata.keys();
             if (keys != null) {
                 for (String key : keys) {
-                    Object value = metadata.get(key);
-                    if (value != null) result.put(key, value);
+					final Object[] value = new Object[1];
+					if (metadata.type(key).equals(String.class.getSimpleName())) {
+						metadata.getString(key, new Function1<String, Unit>() {
+							@Override
+							public Unit invoke(String result) {
+								value[0] = result;
+								return Unit.INSTANCE;
+							}
+						});
+					}
+					else {
+						value[0] = metadata.get(key);
+					}
+                    if (value[0] != null) result.put(key, value[0]);
                 }
             }
         }
-
         return result;
     }
 

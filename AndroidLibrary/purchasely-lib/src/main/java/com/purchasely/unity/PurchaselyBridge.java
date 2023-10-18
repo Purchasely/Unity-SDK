@@ -14,6 +14,7 @@ import com.purchasely.unity.proxy.JsonErrorProxy;
 import com.purchasely.unity.proxy.PresentationResultProxy;
 import com.purchasely.unity.proxy.StartProxy;
 import com.purchasely.unity.proxy.UserLoginProxy;
+import com.purchasely.unity.proxy.IntroOfferEligibilityProxy;
 
 import org.json.JSONObject;
 
@@ -41,6 +42,7 @@ import kotlin.jvm.functions.Function2;
 public class PurchaselyBridge {
     private StartProxy _startProxy;
     private UserLoginProxy _userLoginProxy;
+    private IntroOfferEligibilityProxy _introOfferEligibilityProxy;
     static PlacementContentProxy placementContentProxy;
     private JsonErrorProxy _restoreProductsProxy;
     private PresentationResultProxy _presentationResultProxy;
@@ -60,19 +62,16 @@ public class PurchaselyBridge {
     static PresentationActivityCache presentationActivityCache = null;
 
     @Keep
-    public PurchaselyBridge(Activity activity, String apiKey, String userId, boolean readyToOpenDeeplink,
-                            int storeFlags, int logLevel, int runningMode, StartProxy proxy) {
+    public PurchaselyBridge(Activity activity, String apiKey, String userId, int storeFlags, int logLevel, int runningMode, StartProxy proxy) {
         _startProxy = proxy;
 
         unityActivity = new WeakReference<>(activity);
 
         Purchasely.Builder builder = new Purchasely.Builder(activity.getApplicationContext())
                 .apiKey(apiKey)
-                .readyToOpenDeeplink(readyToOpenDeeplink)
                 .logLevel(Utils.parseLogLevel(logLevel))
                 .runningMode(Utils.parseMode(runningMode))
                 .stores(Utils.parseStoreFlags(storeFlags));
-
 
         if (!userId.isEmpty())
             builder = builder.userId(userId);
@@ -319,21 +318,19 @@ public class PurchaselyBridge {
     }
 
     @Keep
-    public boolean isEligibleForIntroOffer(String planVendorId) {
+    public boolean isEligibleForIntroOffer(String planVendorId, IntroOfferEligibilityProxy proxy) {
+        _introOfferEligibilityProxy = proxy;
         final boolean[] isEligible = {false};
         CountDownLatch latch = new CountDownLatch(1);
 
         Purchasely.plan(planVendorId, plan -> {
             if (plan == null) {
                 Log.e("PurchaselyBridge", "Could not find plan " + planVendorId);
+                _introOfferEligibilityProxy.onError("Could not find plan " + planVendorId);
                 isEligible[0] = false;
             } else {
-                for (PLYPromoOffer offer : plan.getPromoOffers()) {
-                    if (plan.isEligibleToIntroOffer(offer.getStoreOfferId())) {
-                        isEligible[0] = true;
-                        break;
-                    }
-                }
+                isEligible[0] = plan.isEligibleToIntroOffer(null);
+                _introOfferEligibilityProxy.onSuccess(isEligible[0]);
             }
             latch.countDown();
             return null;
@@ -341,6 +338,7 @@ public class PurchaselyBridge {
             throwable -> {
                 latch.countDown();
                 isEligible[0] = false;
+                _introOfferEligibilityProxy.onError(throwable.getMessage());
                 return null;
             }
         );
