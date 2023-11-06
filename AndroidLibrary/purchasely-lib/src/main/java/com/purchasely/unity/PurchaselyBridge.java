@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import io.purchasely.ext.Attribute;
+import io.purchasely.ext.PLYAppTechnology;
 import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYPresentationViewProperties;
@@ -77,6 +79,8 @@ public class PurchaselyBridge {
             builder = builder.userId(userId);
 
         builder.build();
+
+        Purchasely.setAppTechnology(PLYAppTechnology.UNITY);
 
         Purchasely.start((success, error) -> {
             if (_startProxy == null)
@@ -371,6 +375,11 @@ public class PurchaselyBridge {
     public void presentSubscriptions(Activity activity) {
         Intent intent = new Intent(activity, SubscriptionsActivity.class);
         activity.startActivity(intent);
+    }
+
+    @Keep
+    public void setAttribute(int attribute, String value) {
+        Purchasely.setAttribute(Attribute.values()[attribute], value);
     }
 
     @Keep
