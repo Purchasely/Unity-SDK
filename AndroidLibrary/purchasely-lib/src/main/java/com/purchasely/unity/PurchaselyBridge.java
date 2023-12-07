@@ -36,6 +36,7 @@ import io.purchasely.ext.Purchasely;
 import io.purchasely.models.PLYError;
 import io.purchasely.models.PLYPlan;
 import io.purchasely.models.PLYPromoOffer;
+import io.purchasely.views.presentation.PLYThemeMode;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function2;
@@ -360,15 +361,24 @@ public class PurchaselyBridge {
     public void getUserSubscriptions(JsonErrorProxy proxy) {
         _userSubscriptionsProxy = proxy;
 
-        Purchasely.userSubscriptions(plySubscriptionData -> {
-            _userSubscriptionsProxy.onSuccess(Utils.serializeSubscriptions(plySubscriptionData));
-            _userSubscriptionsProxy = null;
-            return null;
-        }, throwable -> {
-            _userSubscriptionsProxy.onError(throwable.getMessage());
-            _userSubscriptionsProxy = null;
-            return null;
-        });
+        Purchasely.userSubscriptions(
+                false,
+                plySubscriptionData -> {
+                    _userSubscriptionsProxy.onSuccess(Utils.serializeSubscriptions(plySubscriptionData));
+                    _userSubscriptionsProxy = null;
+                    return null;
+                },
+                throwable -> {
+                    _userSubscriptionsProxy.onError(throwable.getMessage());
+                    _userSubscriptionsProxy = null;
+                    return null;
+                }
+        );
+    }
+
+    @Keep
+    public void setThemeMode(int themeMode) {
+        Purchasely.setThemeMode(PLYThemeMode.values()[themeMode]);
     }
 
     @Keep

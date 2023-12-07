@@ -26,9 +26,9 @@ android {
 }
 
 dependencies {
-    api 'io.purchasely:core:4.1.1'
-    api 'io.purchasely:google-play:4.1.1'
-    api 'io.purchasely:player:4.1.1'
+    api 'io.purchasely:core:4.2.0'
+    api 'io.purchasely:google-play:4.2.0'
+    api 'io.purchasely:player:4.2.0'
 
     implementation "androidx.fragment:fragment:1.5.6"
     implementation "androidx.appcompat:appcompat:1.6.1"
