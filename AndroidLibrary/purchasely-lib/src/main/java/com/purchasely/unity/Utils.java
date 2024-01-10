@@ -1,7 +1,5 @@
 package com.purchasely.unity;
 
-import static io.purchasely.ext.PLYPresentationType.*;
-
 import android.net.Uri;
 import android.util.Log;
 
@@ -15,30 +13,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Set;
+import java.util.TimeZone;
 
 import io.purchasely.billing.Store;
+import io.purchasely.ext.DistributionType;
 import io.purchasely.ext.LogLevel;
 import io.purchasely.ext.PLYOfferType;
 import io.purchasely.ext.PLYPresentation;
-import io.purchasely.ext.PLYSubscriptionOffer;
-import io.purchasely.ext.PLYPresentationMetadata;
 import io.purchasely.ext.PLYPresentationAction;
 import io.purchasely.ext.PLYPresentationActionParameters;
 import io.purchasely.ext.PLYPresentationInfo;
-import io.purchasely.ext.PLYPresentationType;
+import io.purchasely.ext.PLYPresentationMetadata;
 import io.purchasely.ext.PLYProductViewResult;
 import io.purchasely.ext.PLYRunningMode;
+import io.purchasely.ext.PLYSubscriptionOffer;
 import io.purchasely.ext.PLYSubscriptionStatus;
 import io.purchasely.google.GoogleStore;
 import io.purchasely.models.PLYPlan;
-import io.purchasely.models.PLYPromoOffer;
-import io.purchasely.models.PLYProduct;
-import io.purchasely.models.PLYSubscription;
-import io.purchasely.models.PLYSubscriptionData;
 import io.purchasely.models.PLYPresentationPlan;
-
+import io.purchasely.models.PLYProduct;
+import io.purchasely.models.PLYPromoOffer;
+import io.purchasely.models.PLYSubscriptionData;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
@@ -120,9 +116,11 @@ public class Utils {
 				return 2;
 			case PROMO_CODE:
 				return 3;
+			case PROMOTIONAL_OFFER:
+				return 4;
+			default:
+				return 0;
 		}
-
-		return 0;
 	}
 
 	static int parseSubscriptionStatus(PLYSubscriptionStatus status) {
@@ -151,37 +149,47 @@ public class Utils {
 		return 8;
 	}
 
-	static Map<String, Object> subscriptionToMap(PLYSubscriptionData subscriptionData) {
-		HashMap<String, Object> result = new HashMap<>();
-		result.put("plan", subscriptionData.getPlan().toMap());
-		result.put("product", subscriptionData.getProduct().toMap());
-
-		PLYSubscription subscription = subscriptionData.getData();
-
-		result.put("contentId", subscription.getContentId());
-		result.put("environment", subscription.getEnvironment());
-		result.put("id", subscription.getId());
-		result.put("isFamilyShared", subscription.isFamilyShared());
-		result.put("offerIdentifier", subscription.getOfferIdentifier());
-		result.put("offerType", parseOfferType(subscription.getOfferType()));
-		result.put("originalPurchasedAt", subscription.getOriginalPurchasedAt());
-		result.put("purchaseToken", subscription.getPurchaseToken());
-		result.put("purchasedDate", subscription.getPurchasedAt());
-		result.put("nextRenewalDate", subscription.getNextRenewalAt());
-		result.put("cancelledDate", subscription.getCancelledAt());
-		result.put("storeCountry", subscription.getStoreCountry());
-		result.put("storeType", subscription.getStoreType());
-		result.put("status", parseSubscriptionStatus(subscription.getSubscriptionStatus()));
-
-		return result;
-	}
-
 	static String serializeSubscriptions(List<PLYSubscriptionData> subscriptions) {
 		JSONArray result = new JSONArray();
 		for (int i = 0; i < subscriptions.size(); i++) {
-			result.put(subscriptionToMap(subscriptions.get(i)));
+			PLYSubscriptionData data = subscriptions.get(i);
+			HashMap<String, Object> map = new HashMap<>();
+			map.put("plan", transformPlanToMap(data.getPlan()));
+			map.put("product", data.getProduct().toMap());
+			map.put("contentId", data.getData().getContentId());
+			map.put("environment", data.getData().getEnvironment());
+			map.put("id", data.getData().getId());
+			map.put("isFamilyShared", data.getData().isFamilyShared());
+			map.put("offerIdentifier", data.getData().getOfferIdentifier());
+			map.put("offerType", parseOfferType(data.getData().getOfferType()));
+			map.put("originalPurchasedAt", data.getData().getOriginalPurchasedAt());
+			map.put("purchaseToken", data.getData().getPurchaseToken());
+			map.put("purchasedDate", data.getData().getPurchasedAt());
+			map.put("nextRenewalDate", data.getData().getNextRenewalAt());
+			map.put("cancelledDate", data.getData().getCancelledAt());
+			map.put("storeCountry", data.getData().getStoreCountry());
+			map.put("storeType", data.getData().getStoreType().ordinal());
+			map.put("status", parseSubscriptionStatus(data.getData().getSubscriptionStatus()));
+			result.put(new JSONObject(map));
 		}
+
 		return result.toString();
+	}
+
+	private static Map<String, Object> transformPlanToMap(PLYPlan plan)  {
+		if(plan == null) return new HashMap<>();
+
+		HashMap<String, Object> map = new HashMap<>(plan.toMap());
+		if(plan.getType() == DistributionType.CONSUMABLE) {
+			map.put("type", DistributionType.CONSUMABLE.ordinal());
+		} else if(plan.getType() == DistributionType.NON_CONSUMABLE) {
+			map.put("type", DistributionType.RENEWING_SUBSCRIPTION.ordinal());
+		} else if(plan.getType() == DistributionType.NON_RENEWING_SUBSCRIPTION) {
+			map.put("type", DistributionType.NON_RENEWING_SUBSCRIPTION.ordinal());
+		} else if(plan.getType() == DistributionType.UNKNOWN) {
+			map.put("type", DistributionType.UNKNOWN.ordinal());
+		}
+		return map;
 	}
 
 	static DateFormat getIso8601Format() {

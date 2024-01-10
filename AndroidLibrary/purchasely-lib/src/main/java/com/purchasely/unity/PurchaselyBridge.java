@@ -8,22 +8,18 @@ import android.util.Log;
 import androidx.annotation.Keep;
 
 import com.purchasely.unity.proxy.FetchPresentationProxy;
+import com.purchasely.unity.proxy.IntroOfferEligibilityProxy;
+import com.purchasely.unity.proxy.JsonErrorProxy;
 import com.purchasely.unity.proxy.PaywallInterceptorProxy;
 import com.purchasely.unity.proxy.PlacementContentProxy;
-import com.purchasely.unity.proxy.JsonErrorProxy;
 import com.purchasely.unity.proxy.PresentationResultProxy;
 import com.purchasely.unity.proxy.StartProxy;
 import com.purchasely.unity.proxy.UserLoginProxy;
-import com.purchasely.unity.proxy.IntroOfferEligibilityProxy;
-
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import io.purchasely.ext.Attribute;
@@ -275,7 +271,7 @@ public class PurchaselyBridge {
     public void purchase(Activity activity, String planId, String offerId, String contentId, JsonErrorProxy planPurchaseProxy) {
         _planPurchaseProxy = planPurchaseProxy;
 
-        if (contentId.isEmpty())
+        if (contentId == null || contentId.isEmpty())
             contentId = null;
 
         String finalContentId = contentId;
@@ -310,6 +306,11 @@ public class PurchaselyBridge {
             _planPurchaseProxy = null;
             return null;
         });
+    }
+
+    @Keep
+    public void synchronize() {
+        Purchasely.synchronize();
     }
 
     @Keep

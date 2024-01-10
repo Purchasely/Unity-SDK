@@ -4,8 +4,12 @@ buildscript {
     repositories {
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:5.1.1'
+        classpath 'com.android.tools.build:gradle:8.2.1'
     }
+
+    ext.publishGroupId = 'io.purchasely'
+    ext.sdkVersionCode = 42200
+    ext.sdkVersionName = '4.2.2'
 }
 
 plugins {
