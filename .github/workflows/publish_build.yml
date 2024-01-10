@@ -36,7 +36,7 @@ jobs:
 
         # Publish dependency
       - name: Publish to MavenCentral
-        run: cd AndroidLibrary && ./gradlew :purchasely-lib:publishReleasePublicationToSnapshotRepository -max-workers 1
+        run: cd AndroidLibrary && ./gradlew :purchasely-lib:publishPurchaselyPublicationToSnapshotRepository -max-workers 1
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
