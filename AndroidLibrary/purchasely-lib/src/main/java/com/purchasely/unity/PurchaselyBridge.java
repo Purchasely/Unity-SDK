@@ -377,38 +377,6 @@ public class PurchaselyBridge {
         );
     }
 
-    /*private void userSubscriptions(CallbackContext callbackContext) {
-        Purchasely.userSubscriptions(new SubscriptionsListener() {
-            @Override
-            public void onSuccess(@NotNull List<PLYSubscriptionData> list) {
-                JSONArray result = new JSONArray();
-                for (int i = 0; i < list.size(); i++) {
-                    PLYSubscriptionData data = list.get(i);
-                    HashMap<String, Object> map = new HashMap<>(data.toMap());
-                    map.put("plan", transformPlanToMap(data.getPlan()));
-                    map.put("product", data.getProduct().toMap());
-                    if(data.getData().getStoreType() == StoreType.GOOGLE_PLAY_STORE) {
-                        map.put("subscriptionSource", StoreType.GOOGLE_PLAY_STORE.ordinal());
-                    } else if(data.getData().getStoreType() == StoreType.AMAZON_APP_STORE) {
-                        map.put("subscriptionSource", StoreType.AMAZON_APP_STORE.ordinal());
-                    } else if(data.getData().getStoreType() == StoreType.HUAWEI_APP_GALLERY) {
-                        map.put("subscriptionSource", StoreType.HUAWEI_APP_GALLERY.ordinal());
-                    } else if(data.getData().getStoreType() == StoreType.APPLE_APP_STORE) {
-                        map.put("subscriptionSource", StoreType.APPLE_APP_STORE.ordinal());
-                    }
-                    result.put(new JSONObject(map));
-                }
-                callbackContext.success(result);
-            }
-
-            @Override
-            public void onFailure(@NotNull Throwable throwable) {
-                callbackContext.error(throwable.getMessage());
-            }
-        });
-    }*/
-
-
     @Keep
     public void setThemeMode(int themeMode) {
         Purchasely.setThemeMode(PLYThemeMode.values()[themeMode]);

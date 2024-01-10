@@ -169,9 +169,6 @@ public class Utils {
 			map.put("cancelledDate", data.getData().getCancelledAt());
 			map.put("storeCountry", data.getData().getStoreCountry());
 			map.put("storeType", data.getData().getStoreType().ordinal());
-			Log.d("Kevin", "storeType: " + data.getData().getStoreType().ordinal());
-			Log.d("Kevin", "storeType: " + data.getData().getStoreType().name());
-			Log.d("Kevin", "storeType: " + data.getData().getStoreType().getDisplayName());
 			map.put("status", parseSubscriptionStatus(data.getData().getSubscriptionStatus()));
 			result.put(new JSONObject(map));
 		}
