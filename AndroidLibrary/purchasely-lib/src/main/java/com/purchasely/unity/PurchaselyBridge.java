@@ -229,7 +229,9 @@ public class PurchaselyBridge {
             _productProxy.onSuccess(Utils.serializeProduct(plyProduct));
             return null;
         }, throwable -> {
-            _productProxy.onError(throwable.getMessage());
+            if(throwable != null && throwable.getMessage() != null) {
+                _productProxy.onError(throwable.getMessage());
+            }
             return null;
         });
     }
@@ -247,7 +249,9 @@ public class PurchaselyBridge {
             _planProxy.onSuccess(Utils.serializePlan(plan));
             return null;
         }, throwable -> {
-            _planProxy.onError(throwable.getMessage());
+            if(throwable != null && throwable.getMessage() != null) {
+                _planProxy.onError(throwable.getMessage());
+            }
             return null;
         });
     }
@@ -261,7 +265,9 @@ public class PurchaselyBridge {
             _allProductsProxy = null;
             return null;
         }, throwable -> {
-            _allProductsProxy.onError(throwable.getMessage());
+            if(throwable != null && throwable.getMessage() != null) {
+                _allProductsProxy.onError(throwable.getMessage());
+            }
             _allProductsProxy = null;
             return null;
         });
@@ -295,14 +301,18 @@ public class PurchaselyBridge {
                 _planPurchaseProxy = null;
                 return null;
             }, throwable -> {
-                _planPurchaseProxy.onError(throwable.getMessage());
+                if(throwable != null && throwable.getMessage() != null) {
+                    _planPurchaseProxy.onError(throwable.getMessage());
+                }
                 _planPurchaseProxy = null;
                 return null;
             });
 
             return null;
         }, throwable -> {
-            _planPurchaseProxy.onError(throwable.getMessage());
+            if(throwable != null && throwable.getMessage() != null) {
+                _planPurchaseProxy.onError(throwable.getMessage());
+            }
             _planPurchaseProxy = null;
             return null;
         });
@@ -344,7 +354,9 @@ public class PurchaselyBridge {
             throwable -> {
                 latch.countDown();
                 isEligible[0] = false;
-                _introOfferEligibilityProxy.onError(throwable.getMessage());
+                if(throwable != null && throwable.getMessage() != null) {
+                    _introOfferEligibilityProxy.onError(throwable.getMessage());
+                }
                 return null;
             }
         );
@@ -370,7 +382,9 @@ public class PurchaselyBridge {
                     return null;
                 },
                 throwable -> {
-                    _userSubscriptionsProxy.onError(throwable.getMessage());
+                    if(throwable != null && throwable.getMessage() != null) {
+                        _userSubscriptionsProxy.onError(throwable.getMessage());
+                    }
                     _userSubscriptionsProxy = null;
                     return null;
                 }
@@ -593,7 +607,9 @@ public class PurchaselyBridge {
 
     private Function1<PLYError, Unit> purchaseRestoreErrorCallback() {
         return plyError -> {
-            _restoreProductsProxy.onError(plyError.toString());
+            if(plyError != null) {
+                _restoreProductsProxy.onError(plyError.toString());
+            }
             _restoreProductsProxy = null;
             return null;
         };
