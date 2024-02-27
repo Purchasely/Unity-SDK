@@ -607,8 +607,8 @@ public class PurchaselyBridge {
 
     private Function1<PLYError, Unit> purchaseRestoreErrorCallback() {
         return plyError -> {
-            if(plyError != null) {
-                _restoreProductsProxy.onError(plyError.toString());
+            if(plyError != null && plyError.getMessage() != null) {
+                _restoreProductsProxy.onError(plyError.getMessage());
             }
             _restoreProductsProxy = null;
             return null;
@@ -627,7 +627,7 @@ public class PurchaselyBridge {
 
     private Function2<PLYPresentation, PLYError, Unit> fetchPresentationCallback() {
         return (presentation, error) -> {
-            if (error != null) {
+            if (error != null && error.getMessage() != null) {
                 _presentationProxy.onError(error.getMessage());
             }
 
