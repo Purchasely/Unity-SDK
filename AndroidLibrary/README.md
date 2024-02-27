@@ -8,9 +8,8 @@ Use AAR files for local testing
 ```groovy
 ./gradlew clean :purchasely-lib:assembleRelease
 //Publish to MavenCentral
-./gradlew :purchasely-lib:publishReleasePublicationToSnapshotRepository
-//Close and Release MavenCentral
-./gradlew closeAndReleaseRepository
+./gradlew :purchasely-lib:publishPurchaselyPublicationToSnapshotRepository
+./gradlew :purchasely-lib:publishPurchaselyPublicationToMavenCentralRepository
 ```
 
 This will only work if you have set up the following variables in your local.properties file :
