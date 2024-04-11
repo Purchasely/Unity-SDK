@@ -1,6 +1,13 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
+    id 'signing'
+    id "com.vanniktech.maven.publish" version "0.28.0"
 }
+
+apply from: "${rootProject.projectDir}/purchasely-lib/scripts/mavencentral.gradle"
 
 def getArtifactId = { ->
     return 'unity-android'
@@ -34,21 +41,50 @@ dependencies {
     api 'io.purchasely:google-play:4.3.4'
     api 'io.purchasely:player:4.3.4'
 
-    implementation "androidx.fragment:fragment:1.6.1"
+    implementation "androidx.fragment:fragment:1.6.2"
     implementation "androidx.appcompat:appcompat:1.6.1"
 }
 
-task copyAarToUnity {
-    doLast {
-        project.copy {
-            from "$buildDir/outputs/aar"
-            include '*release.aar'
-            println "Copying into [$rootProject.ext.libraryFolder]"
-            into rootProject.ext.libraryFolder
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.S01, false)
+    signAllPublications()
+
+    coordinates(publishGroupId, "unity-android", sdkVersionName)
+
+    pom {
+        name = "unity-android"
+        description = 'Purchasely Android Unity SDK'
+        url = 'https://github.com/Purchasely/Unity-SDK'
+        licenses {
+            license {
+                name = 'Purchasely License'
+                url = 'https://github.com/Purchasely/Purchasely-Android/blob/master/LICENSE'
+            }
+        }
+        developers {
+            developer {
+                id = 'kHerembourg'
+                name = 'Kevin Herembourg'
+                email = 'kevin@purchasely.com'
+            }
+            // Add all other devs here...
+        }
+
+        scm {
+            connection = 'scm:git:github.com/purchasely/unity-sdk.git'
+            developerConnection = 'scm:git:ssh://github.com/purchasely/unity-sdk.git'
+            url = 'https://github.com/purchasely/unity-sdk/tree/main'
         }
     }
 }
 
-tasks.build.finalizedBy copyAarToUnity
+signing {
 
-apply from: "${rootProject.projectDir}/purchasely-lib/scripts/publish.gradle"
+    // Since the publication itself was created in `afterEvaluate`, we must
+    // do the same here.
+    afterEvaluate {
+        // This adds a signing stage to the publish task in-place (so we keep
+        // using the same task name; it just also performs signing now).
+        sign publishing.publications
+    }
+}

@@ -7,24 +7,28 @@ Use AAR files for local testing
 
 ```groovy
 ./gradlew clean :purchasely-lib:assembleRelease
-//Publish to MavenCentral
-./gradlew :purchasely-lib:publishPurchaselyPublicationToSnapshotRepository
-./gradlew :purchasely-lib:publishPurchaselyPublicationToMavenCentralRepository
+
+//Publish to Maven Central
+./gradlew :purchasely-lib:publishAndReleaseToMavenCentral --no-configuration-cache
 ```
 
 This will only work if you have set up the following variables in your local.properties file :
-
+```
 signing.keyId
 
 signing.password
 
 signing.secretKeyRingFile
 
-ossrhUsername
-
-ossrhPassword
-
 sonatypeStagingProfileId=1390e1929a68bb
+```   
+
+and in your ~/.gradle/gradle.properties file :
+```
+mavenCentralUsername=username
+
+mavenCentralPassword=the_password
+```
 
 ## Local Deployment
 
