@@ -14,11 +14,11 @@ Use AAR files for local testing
 
 This will only work if you have set up the following variables in your local.properties file :
 ```
-signing.keyId
+signing.keyId=your_signing_key_id
 
-signing.password
+signing.password=your_signing_password
 
-signing.secretKeyRingFile
+signing.secretKeyRingFile=path/to/gpg/key
 
 sonatypeStagingProfileId=1390e1929a68bb
 ```   
