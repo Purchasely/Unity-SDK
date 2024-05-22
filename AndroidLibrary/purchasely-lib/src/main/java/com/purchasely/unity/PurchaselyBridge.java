@@ -111,11 +111,14 @@ public class PurchaselyBridge {
             Activity activity,
             String placementId,
             PlacementContentProxy proxy,
-            String contentId) {
+            String contentId,
+            boolean fullScreen) {
 
         placementContentProxy = proxy;
         Intent intent = new Intent(activity, PresentationActivity.class);
         intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLACEMENT);
+        intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
+
         if (!placementId.isEmpty())
             intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
         if (!contentId.isEmpty())
@@ -125,13 +128,18 @@ public class PurchaselyBridge {
     }
 
     @Keep
-    public void showContentForPresentation(Activity activity, String presentationId,
-                                           PlacementContentProxy proxy, String contentId) {
+    public void showContentForPresentation(
+            Activity activity,
+            String presentationId,
+            PlacementContentProxy proxy,
+            String contentId,
+            boolean fullScreen) {
+
         placementContentProxy = proxy;
 
         Intent intent = new Intent(activity, PresentationActivity.class);
-
         intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION);
+        intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
 
         if (!presentationId.isEmpty())
             intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
@@ -142,13 +150,19 @@ public class PurchaselyBridge {
     }
 
     @Keep
-    public void showContentForProduct(Activity activity, String productId,
-                                      PlacementContentProxy proxy, String contentId, String presentationId) {
+    public void showContentForProduct(
+            Activity activity,
+            String productId,
+            PlacementContentProxy proxy,
+            String contentId,
+            String presentationId,
+            boolean fullScreen) {
+
         placementContentProxy = proxy;
 
         Intent intent = new Intent(activity, PresentationActivity.class);
-
         intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRODUCT);
+        intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
 
         if (!productId.isEmpty())
             intent.putExtra(PresentationActivity.EXTRA_PRODUCT_ID, productId);
@@ -161,13 +175,19 @@ public class PurchaselyBridge {
     }
 
     @Keep
-    public void showContentForPlan(Activity activity, String planId,
-                                   PlacementContentProxy proxy, String contentId, String presentationId) {
+    public void showContentForPlan(
+            Activity activity,
+            String planId,
+            PlacementContentProxy proxy,
+            String contentId,
+            String presentationId,
+            boolean fullScreen) {
+
         placementContentProxy = proxy;
 
         Intent intent = new Intent(activity, PresentationActivity.class);
-
         intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PLAN);
+        intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
 
         if (!planId.isEmpty())
             intent.putExtra(PresentationActivity.EXTRA_PLAN_ID, planId);
@@ -175,6 +195,25 @@ public class PurchaselyBridge {
             intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentationId);
         if (!contentId.isEmpty())
             intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
+
+        activity.startActivity(intent);
+    }
+
+    @Keep
+    public void showContentForPresentation(
+            Activity activity,
+            PLYPresentation presentation,
+            PlacementContentProxy proxy,
+            boolean fullScreen) {
+
+        placementContentProxy = proxy;
+
+        Intent intent = new Intent(activity, PresentationActivity.class);
+        intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION_WITH_VIEW);
+        intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentation.getId());
+        intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, presentation.getPlacementId());
+        intent.putExtra(PresentationActivity.EXTRA_PRESENTATION, presentation);
+        intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
 
         activity.startActivity(intent);
     }
@@ -513,23 +552,6 @@ public class PurchaselyBridge {
         Purchasely.clientPresentationClosed(presentation);
     }
 
-    @Keep
-    public void showContentForPresentation(Activity activity, PLYPresentation presentation,
-                                           PlacementContentProxy proxy) {
-        placementContentProxy = proxy;
-
-        Intent intent = new Intent(activity, PresentationActivity.class);
-
-        intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, PresentationActivity.CODE_PRESENTATION_WITH_VIEW);
-
-        intent.putExtra(PresentationActivity.EXTRA_PRESENTATION_ID, presentation.getId());
-        intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, presentation.getPlacementId());
-
-        intent.putExtra(PresentationActivity.EXTRA_PRESENTATION, presentation);
-
-        activity.startActivity(intent);
-    }
-
     private void showPresentation() {
         Activity activity = unityActivity.get();
         presentationActivityCache.relaunch(activity);
@@ -645,6 +667,7 @@ public class PurchaselyBridge {
         String productId = null;
         String planId = null;
         String contentId = null;
+        boolean fullScreen = false;
         int actionCode = -1;
 
         WeakReference<PresentationActivity> activity = null;
@@ -676,6 +699,7 @@ public class PurchaselyBridge {
             intent.putExtra(PresentationActivity.EXTRA_PLACEMENT_ID, placementId);
             intent.putExtra(PresentationActivity.EXTRA_CONTENT_ID, contentId);
             intent.putExtra(PresentationActivity.EXTRA_ACTION_CODE, actionCode);
+            intent.putExtra(PresentationActivity.EXTRA_FULLSCREEN, fullScreen);
 
             unityActivity.startActivity(intent);
             return relaunchExisting;

@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.ref.WeakReference;
+import android.view.View;
 
 import io.purchasely.ext.PLYPresentation;
 import io.purchasely.ext.PLYPresentationViewProperties;
@@ -27,6 +28,7 @@ public class PresentationActivity extends AppCompatActivity {
 	final static String EXTRA_PRODUCT_ID = "EXTRA_PRODUCT_ID";
 	final static String EXTRA_PLAN_ID = "EXTRA_PLAN_ID";
 	final static String EXTRA_PRESENTATION = "EXTRA_PRESENTATION";
+	final static String EXTRA_FULLSCREEN = "EXTRA_FULLSCREEN";
 
 	final static String EXTRA_ACTION_CODE = "EXTRA_ACTION_CODE";
 
@@ -50,6 +52,12 @@ public class PresentationActivity extends AppCompatActivity {
 		String presentationId = intent.getStringExtra(EXTRA_PRESENTATION_ID);
 		String productId = intent.getStringExtra(EXTRA_PRODUCT_ID);
 		String planId = intent.getStringExtra(EXTRA_PLAN_ID);
+		boolean isFullscreen = intent.getBooleanExtra(EXTRA_FULLSCREEN, false);
+
+		if (isFullscreen) {
+			hideSystemUI();
+			getSupportActionBar().hide();
+		}
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				placementId, presentationId, productId, planId, contentId, true,
@@ -99,6 +107,13 @@ public class PresentationActivity extends AppCompatActivity {
 		cache.activity = new WeakReference<>(this);
 
 		PurchaselyBridge.presentationActivityCache = cache;
+	}
+
+	private void hideSystemUI() {
+		getWindow().getDecorView().setSystemUiVisibility(
+				View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+						| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+						| View.SYSTEM_UI_FLAG_FULLSCREEN);
 	}
 
 	private Function2<PLYProductViewResult, PLYPlan, Unit> productViewResultCallback() {
