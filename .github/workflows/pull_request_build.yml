@@ -1,0 +1,20 @@
+name: Pull request build
+
+on: pull_request
+
+jobs:
+  assemble_release:
+    name: Assemble Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Release build
+        run: cd AndroidLibrary && ./gradlew clean :purchasely-lib:assembleRelease
