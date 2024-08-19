@@ -526,7 +526,7 @@ public class PurchaselyBridge {
 
         PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
                 null, presentationId, null, null, contentId, true,
-                null, null, null, null);
+                null, null, null, null, null);
 
         Purchasely.fetchPresentation(properties, fetchPresentationCallback());
     }
@@ -537,7 +537,7 @@ public class PurchaselyBridge {
 
         PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
                 placementId, null, null, null, contentId, true,
-                null, null, null, null);
+                null, null, null, null, null);
 
         Purchasely.fetchPresentation(properties, fetchPresentationCallback());
     }
