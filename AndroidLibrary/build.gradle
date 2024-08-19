@@ -8,8 +8,8 @@ buildscript {
     }
 
     ext.publishGroupId = 'io.purchasely'
-    ext.sdkVersionCode = 433000
-    ext.sdkVersionName = '4.3.3'
+    ext.sdkVersionCode = 45000
+    ext.sdkVersionName = '4.5.0'
 }
 
 plugins {

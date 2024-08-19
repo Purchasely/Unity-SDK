@@ -61,7 +61,7 @@ public class PresentationActivity extends AppCompatActivity {
 
 		PLYPresentationViewProperties properties = new PLYPresentationViewProperties(
 				placementId, presentationId, productId, planId, contentId, true,
-				contentLoadedCallback(), viewClosedCallback(), null, null);
+				contentLoadedCallback(), viewClosedCallback(), null, null, null);
 
 		FrameLayout frameLayout = findViewById(R.id.content);
 		frameLayout.removeAllViews();
